@@ -129,7 +129,7 @@ With the simulation running the vehicle (blue rectangle) follows the reference p
 
 ![Pure Pursuit Running](docs/pics/path_tracking/pure_pursuit/pure_pursuit.png)
 
-> A screen-capture video of the full run is available at `docs/pics/path_tracking/pure_pursuit/pure_pursuit.mp4`.
+![Pure Pursuit Full Run](docs/pics/path_tracking/pure_pursuit/pure_pursuit.gif)
 
 ---
 
