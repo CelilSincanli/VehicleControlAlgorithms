@@ -4,7 +4,7 @@
   "mass":  8300.0,
   "a":     2.0,
   "b":     2.335,
-  "CA":    0.00038,
+  "CA":    0.000394,
 
   "minimum_turning_radius":   4.6,
   "max_steering_wheel_angle": 900.0,

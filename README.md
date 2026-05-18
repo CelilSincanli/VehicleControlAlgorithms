@@ -146,9 +146,9 @@ Create a JSON file under `data/vehicle/`, e.g. `data/vehicle/vehicle02.json`:
 | Field | Description | Unit |
 |-------|-------------|------|
 | `mass` | Vehicle mass | kg |
-| `a` | Front axle to centre of gravity | m |
-| `b` | Rear axle to centre of gravity (`a + b = wheelbase`) | m |
-| `CA` | Mass-normalised aerodynamic drag coefficient | 1/m |
+| `a` | Distance from **front axle** to COG. COG position from vehicle front = `front_overhang + a`. For Bus 01: 2.37 + 2.0 = 4.37 m (~50 % of total length 8.72 m) | m |
+| `b` | Distance from **rear axle** to COG. Must satisfy `a + b = wheelbase`. For Bus 01: 2.0 + 2.335 = 4.335 m | m |
+| `CA` | Mass-normalised aerodynamic drag coefficient. Formula: `CA = (0.5 × ρ × Cd × Af) / mass` where ρ = 1.225 kg/m³, Af = vehicle width × height. Typical Cd: passenger car 0.25–0.30, SUV 0.30–0.35, bus 0.60–0.80. For Bus 01: Cd = 0.70, Af = 2.47 × 3.09 = 7.63 m² → CA = (0.5 × 1.225 × 0.70 × 7.63) / 8300 = 0.000394 | 1/m |
 | `minimum_turning_radius` | Minimum kinematic turning radius | m |
 | `max/min_steering_wheel_angle` | Steering wheel travel limits | deg |
 | `max_steering_wheel_rate` | Maximum steering rate | deg/s |
