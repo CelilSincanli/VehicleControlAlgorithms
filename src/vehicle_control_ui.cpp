@@ -16,7 +16,7 @@ static void glfw_error_callback(int error, const char* description) {
 VehicleControlUI::VehicleControlUI()
     : window(nullptr), mainFont(nullptr), headingFont(nullptr),
       iconFont(nullptr), iconFont2(nullptr),
-      algorithmSelected(false), pathSelected(false),
+      vehicleSelected(false), algorithmSelected(false), pathSelected(false),
       currentScreen(MAIN_SCREEN) {}
 
 VehicleControlUI::~VehicleControlUI() {
@@ -130,8 +130,10 @@ void VehicleControlUI::RenderMainScreen() {
     float button_height = 40.0f;
     float spacing = 20.0f;
 
-    // 3 buttons + 2 spacers between them
-    float total_height = text_size.y + spacing + button_height + spacing + button_height + spacing + button_height;
+    // 4 buttons + 3 spacers between them
+    float total_height = text_size.y + spacing
+        + button_height + spacing + button_height
+        + spacing + button_height + spacing + button_height;
     float start_y = (window_size.y - total_height) * 0.5f;
     float text_x = (window_size.x - total_text_width) * 0.5f;
 
@@ -146,11 +148,59 @@ void VehicleControlUI::RenderMainScreen() {
 
     float button_x = (window_size.x - button_width) * 0.5f;
 
-    // Button 1: Select Algorithm
+    // Button 1: Select Vehicle
     start_y += text_size.y + spacing;
     ImGui::SetCursorPos(ImVec2(button_x, start_y));
     ImGui::PushFont(iconFont);
     ImGui::Text("%s", dripicon_v2::rocket);
+    ImGui::PopFont();
+    ImGui::SameLine();
+    if (ImGui::Button("Select Vehicle", ImVec2(button_width, button_height))) {
+        available_vehicles_ = VehicleLoader::DiscoverVehicles(std::string(DATA_PATH) + "/vehicle");
+        ImGui::OpenPopup("Select Vehicle##popup");
+    }
+    if (vehicleSelected) {
+        ImGui::SameLine();
+        ImGui::PushFont(iconFont2);
+        ImGui::TextColored(ImVec4(0.2f, 0.8f, 0.2f, 1.0f), "%s", dripicon_v2::checkmark);
+        ImGui::PopFont();
+        if (vehicle_loader_.GetVehicle().loaded) {
+            ImGui::SameLine();
+            ImGui::TextDisabled("(%s)", vehicle_loader_.GetVehicle().name.c_str());
+        }
+    }
+
+    // Vehicle selector popup
+    ImGui::SetNextWindowSize(ImVec2(320, 0), ImGuiCond_Always);
+    if (ImGui::BeginPopupModal("Select Vehicle##popup", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::Text("Available Vehicles");
+        ImGui::Separator();
+        if (available_vehicles_.empty()) {
+            ImGui::TextDisabled("No vehicles found in data/vehicle/");
+        }
+        ImGui::BeginChild("##vehiclelist", ImVec2(300, 180), true);
+        for (const auto& path : available_vehicles_) {
+            std::string label = std::filesystem::path(path).stem().string();
+            if (ImGui::Selectable(label.c_str())) {
+                if (vehicle_loader_.Load(path)) {
+                    vehicleSelected = true;
+                }
+                ImGui::CloseCurrentPopup();
+            }
+        }
+        ImGui::EndChild();
+        ImGui::Spacing();
+        if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+
+    // Button 2: Select Algorithm
+    start_y += button_height + spacing;
+    ImGui::SetCursorPos(ImVec2(button_x, start_y));
+    ImGui::PushFont(iconFont);
+    ImGui::Text("%s", dripicon_v2::graph_line);
     ImGui::PopFont();
     ImGui::SameLine();
     if (ImGui::Button("Select Algorithm", ImVec2(button_width, button_height))) {
@@ -186,7 +236,7 @@ void VehicleControlUI::RenderMainScreen() {
         ImGui::EndPopup();
     }
 
-    // Button 2: Select Map
+    // Button 3: Select Map
     start_y += button_height + spacing;
     ImGui::SetCursorPos(ImVec2(button_x, start_y));
     ImGui::PushFont(iconFont);
@@ -234,7 +284,7 @@ void VehicleControlUI::RenderMainScreen() {
         ImGui::EndPopup();
     }
 
-    // Button 3: Start Simulation (disabled until both above are selected)
+    // Button 4: Start Simulation (requires all 3 selections)
     start_y += button_height + spacing;
     ImGui::SetCursorPos(ImVec2(button_x, start_y));
     ImGui::PushFont(iconFont);
@@ -242,7 +292,7 @@ void VehicleControlUI::RenderMainScreen() {
     ImGui::PopFont();
     ImGui::SameLine();
 
-    bool canStart = algorithmSelected && pathSelected;
+    bool canStart = vehicleSelected && algorithmSelected && pathSelected;
     ImGui::BeginDisabled(!canStart);
     if (ImGui::Button("Start Simulation", ImVec2(button_width, button_height))) {
         currentScreen = SIMULATION_SCREEN;
