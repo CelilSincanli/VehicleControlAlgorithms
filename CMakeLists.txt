@@ -14,6 +14,7 @@ add_executable(${PROJECT_NAME}
     src/vehicle_control_ui.cpp
     src/map/map_loader.cpp
     src/vehicle/vehicle_loader.cpp
+    src/vehicle/vehicle_bicycle_model.cpp
     src/path_tracking/pure_pursuit/pure_pursuit.cpp
     include/third_parties/imgui/imgui.cpp
     include/third_parties/imgui/imgui_draw.cpp

@@ -1,15 +1,9 @@
 #pragma once
 #include "map/map_data.hpp"
+#include "vehicle/vehicle_state.hpp"
 #include <vector>
 
 namespace path_tracking {
-
-struct VehicleState {
-    float x       = 0.0f;
-    float y       = 0.0f;
-    float heading = 0.0f; // radians, 0 = east
-    float speed   = 0.0f;
-};
 
 struct PurePursuitConfig {
     float lookahead_distance = 1.0f;
@@ -21,16 +15,18 @@ public:
     explicit PurePursuit(const PurePursuitConfig& config = {});
 
     void  SetPath(const std::vector<Point2D>& waypoints);
-    float ComputeSteering(const VehicleState& state) const;
+
+    // Returns front-wheel steering angle δ [rad] given current vehicle state.
+    float ComputeSteering(const vehicle::VehicleState& state) const;
 
     const PurePursuitConfig& GetConfig() const { return config_; }
 
 private:
-    PurePursuitConfig      config_;
-    std::vector<Point2D>   path_;
+    PurePursuitConfig    config_;
+    std::vector<Point2D> path_;
 
-    int      FindClosestWaypoint (const VehicleState& state) const;
-    Point2D  FindLookaheadPoint  (const VehicleState& state, int closest_idx) const;
+    int     FindClosestWaypoint(const vehicle::VehicleState& state) const;
+    Point2D FindLookaheadPoint (const vehicle::VehicleState& state, int closest_idx) const;
 };
 
 } // namespace path_tracking

@@ -11,13 +11,12 @@ void PurePursuit::SetPath(const std::vector<Point2D>& waypoints) {
     path_ = waypoints;
 }
 
-float PurePursuit::ComputeSteering(const VehicleState& state) const {
+float PurePursuit::ComputeSteering(const vehicle::VehicleState& state) const {
     if (path_.empty()) return 0.0f;
 
     int closest = FindClosestWaypoint(state);
     Point2D target = FindLookaheadPoint(state, closest);
 
-    // Transform target into vehicle-local frame
     float dx = target.x - state.x;
     float dy = target.y - state.y;
     float local_y = -dx * std::sin(state.heading) + dy * std::cos(state.heading);
@@ -29,7 +28,7 @@ float PurePursuit::ComputeSteering(const VehicleState& state) const {
     return std::atan(curvature * config_.wheelbase);
 }
 
-int PurePursuit::FindClosestWaypoint(const VehicleState& state) const {
+int PurePursuit::FindClosestWaypoint(const vehicle::VehicleState& state) const {
     int   idx      = 0;
     float min_dist = std::numeric_limits<float>::max();
     for (int i = 0; i < (int)path_.size(); ++i) {
@@ -41,7 +40,7 @@ int PurePursuit::FindClosestWaypoint(const VehicleState& state) const {
     return idx;
 }
 
-Point2D PurePursuit::FindLookaheadPoint(const VehicleState& state, int closest_idx) const {
+Point2D PurePursuit::FindLookaheadPoint(const vehicle::VehicleState& state, int closest_idx) const {
     float ld = config_.lookahead_distance;
     for (int i = closest_idx; i < (int)path_.size(); ++i) {
         float dx = path_[i].x - state.x;
