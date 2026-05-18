@@ -598,22 +598,29 @@ void VehicleControlUI::RenderSimulationScreen() {
             }
         }
 
-        // Vehicle info panel
+        // Info panel
         float infoY = buttonHeight + 40.0f;
+        const float rowH = 22.0f;
         ImGui::SetCursorPos(ImVec2(10.0f, infoY));
         ImGui::Separator();
         ImGui::SetCursorPos(ImVec2(10.0f, infoY + 8.0f));
-        ImGui::TextColored(ImVec4(0.7f, 0.9f, 1.0f, 1.0f), "Vehicle Info");
-        ImGui::SetCursorPos(ImVec2(10.0f, infoY + 30.0f));
-        ImGui::Text("Speed : %.1f km/h", simVehicleState_.speed * 3.6f);
-        ImGui::SetCursorPos(ImVec2(10.0f, infoY + 52.0f));
+        ImGui::TextColored(ImVec4(0.7f, 0.9f, 1.0f, 1.0f), "Simulation Info");
+        ImGui::SetCursorPos(ImVec2(10.0f, infoY + 8.0f + rowH));
+        ImGui::Text("Algorithm    : %s", selectedAlgorithm_.c_str());
+        ImGui::SetCursorPos(ImVec2(10.0f, infoY + 8.0f + rowH * 2));
+        ImGui::Text("Vehicle Type : %s", vehicle_loader_.GetVehicle().name.c_str());
+        ImGui::SetCursorPos(ImVec2(10.0f, infoY + 8.0f + rowH * 3));
+        ImGui::Text("Map          : %s", map_loader_.GetMap().name.c_str());
+        ImGui::SetCursorPos(ImVec2(10.0f, infoY + 8.0f + rowH * 4));
+        ImGui::Text("Speed        : %.1f km/h", simVehicleState_.speed * 3.6f);
+        ImGui::SetCursorPos(ImVec2(10.0f, infoY + 8.0f + rowH * 5));
         const char* statusStr = (simRunState_ == SIM_RUNNING) ? "Running"
                               : (simRunState_ == SIM_DONE)    ? "Done"
                               :                                 "Idle";
         ImVec4 statusColor = (simRunState_ == SIM_RUNNING) ? ImVec4(0.2f, 0.9f, 0.4f, 1.0f)
                            : (simRunState_ == SIM_DONE)    ? ImVec4(1.0f, 0.7f, 0.2f, 1.0f)
                            :                                  ImVec4(0.6f, 0.6f, 0.6f, 1.0f);
-        ImGui::Text("Status:");
+        ImGui::Text("Status       :");
         ImGui::SameLine();
         ImGui::TextColored(statusColor, "%s", statusStr);
 
