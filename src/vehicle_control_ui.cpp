@@ -1,4 +1,6 @@
 #include "vehicle_control_ui.hpp"
+#include "map_data.hpp"
+#include <filesystem>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -157,21 +159,52 @@ void VehicleControlUI::RenderMainScreen() {
         ImGui::PopFont();
     }
 
-    // Button 2: Select Path
+    // Button 2: Select Map
     start_y += button_height + spacing;
     ImGui::SetCursorPos(ImVec2(button_x, start_y));
     ImGui::PushFont(iconFont);
     ImGui::Text("%s", dripicon_v2::upload);
     ImGui::PopFont();
     ImGui::SameLine();
-    if (ImGui::Button("Select Path", ImVec2(button_width, button_height))) {
-        pathSelected = true;
+    if (ImGui::Button("Select Map", ImVec2(button_width, button_height))) {
+        available_maps_ = MapLoader::DiscoverMaps(std::string(DATA_PATH) + "/maps");
+        ImGui::OpenPopup("Select Map##popup");
     }
     if (pathSelected) {
         ImGui::SameLine();
         ImGui::PushFont(iconFont2);
         ImGui::TextColored(ImVec4(0.2f, 0.8f, 0.2f, 1.0f), "%s", dripicon_v2::checkmark);
         ImGui::PopFont();
+        if (map_loader_.GetMap().loaded) {
+            ImGui::SameLine();
+            ImGui::TextDisabled("(%s)", map_loader_.GetMap().name.c_str());
+        }
+    }
+
+    // Map selector popup
+    ImGui::SetNextWindowSize(ImVec2(320, 0), ImGuiCond_Always);
+    if (ImGui::BeginPopupModal("Select Map##popup", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::Text("Available Maps");
+        ImGui::Separator();
+        if (available_maps_.empty()) {
+            ImGui::TextDisabled("No maps found in data/maps/");
+        }
+        ImGui::BeginChild("##maplist", ImVec2(300, 180), true);
+        for (const auto& dir : available_maps_) {
+            std::string label = std::filesystem::path(dir).filename().string();
+            if (ImGui::Selectable(label.c_str())) {
+                if (map_loader_.Load(dir)) {
+                    pathSelected = true;
+                }
+                ImGui::CloseCurrentPopup();
+            }
+        }
+        ImGui::EndChild();
+        ImGui::Spacing();
+        if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
     }
 
     // Button 3: Start Simulation (disabled until both above are selected)
@@ -224,9 +257,44 @@ void VehicleControlUI::RenderSimulationScreen() {
         ImVec2 availableSize = ImGui::GetContentRegionAvail();
         if (ImPlot::BeginPlot("Vehicle Control Algorithms", availableSize,
                 ImPlotFlags_NoLegend | ImPlotFlags_NoFrame | ImPlotFlags_NoMenus)) {
+            const MapData& map  = map_loader_.GetMap();
+            const PathData& path = map_loader_.GetPath();
+
+            float w = map.loaded ? map.world_width  : 10.0f;
+            float h = map.loaded ? map.world_height :  5.0f;
             ImPlot::SetupAxes("X-Axis", "Y-Axis");
-            ImPlot::SetupAxisLimits(ImAxis_X1, 0, 10);
-            ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 5);
+            ImPlot::SetupAxisLimits(ImAxis_X1, 0, w, ImGuiCond_Always);
+            ImPlot::SetupAxisLimits(ImAxis_Y1, 0, h, ImGuiCond_Always);
+
+            if (map.loaded) {
+                ImDrawList* dl = ImPlot::GetPlotDrawList();
+                for (const auto& obs : map.obstacles) {
+                    ImVec2 p_min = ImPlot::PlotToPixels(obs.x,             obs.y + obs.height);
+                    ImVec2 p_max = ImPlot::PlotToPixels(obs.x + obs.width, obs.y);
+                    dl->AddRectFilled(p_min, p_max, IM_COL32(100, 100, 120, 230));
+                    dl->AddRect      (p_min, p_max, IM_COL32(160, 160, 180, 255), 0.0f, 0, 1.5f);
+                }
+            }
+
+            if (path.loaded) {
+                std::vector<float> px, py;
+                for (const auto& wp : path.waypoints) {
+                    px.push_back(wp.x);
+                    py.push_back(wp.y);
+                }
+                ImPlot::SetNextLineStyle(ImVec4(0.3f, 0.9f, 0.3f, 1.0f), 2.0f);
+                ImPlot::PlotLine("Path", px.data(), py.data(), (int)px.size());
+            }
+
+            if (map.loaded) {
+                float sx = map.start.x, sy = map.start.y;
+                float gx = map.goal.x,  gy = map.goal.y;
+                ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle, 10.0f, ImVec4(0.2f, 0.9f, 0.2f, 1.0f));
+                ImPlot::PlotScatter("Start", &sx, &sy, 1);
+                ImPlot::SetNextMarkerStyle(ImPlotMarker_Square, 10.0f, ImVec4(0.9f, 0.3f, 0.2f, 1.0f));
+                ImPlot::PlotScatter("Goal", &gx, &gy, 1);
+            }
+
             ImPlot::EndPlot();
         }
     }

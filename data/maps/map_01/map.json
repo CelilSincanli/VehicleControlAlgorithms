@@ -1,0 +1,48 @@
+{
+  "name": "Corridor Map",
+  "world": {
+    "width": 10.0,
+    "height": 5.0
+  },
+  "start": { "x": 0.5, "y": 2.5 },
+  "goal":  { "x": 9.5, "y": 2.5 },
+  "vehicle_radius": 0.2,
+  "obstacles": [
+    {
+      "id": "wall_a",
+      "shape": "rectangle",
+      "x": 2.0, "y": 0.0,
+      "width": 0.4, "height": 1.8
+    },
+    {
+      "id": "wall_b",
+      "shape": "rectangle",
+      "x": 2.0, "y": 2.8,
+      "width": 0.4, "height": 2.2
+    },
+    {
+      "id": "box_1",
+      "shape": "rectangle",
+      "x": 4.5, "y": 0.0,
+      "width": 0.4, "height": 1.5
+    },
+    {
+      "id": "box_2",
+      "shape": "rectangle",
+      "x": 4.5, "y": 2.5,
+      "width": 0.4, "height": 2.5
+    },
+    {
+      "id": "wall_c",
+      "shape": "rectangle",
+      "x": 7.0, "y": 0.0,
+      "width": 0.4, "height": 2.0
+    },
+    {
+      "id": "wall_d",
+      "shape": "rectangle",
+      "x": 7.0, "y": 3.0,
+      "width": 0.4, "height": 2.0
+    }
+  ]
+}
