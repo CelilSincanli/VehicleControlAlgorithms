@@ -186,16 +186,3 @@ Create a JSON file under `data/vehicle/`, e.g. `data/vehicle/vehicle02.json`:
 | Pure Pursuit | Implemented — `PurePursuit::ComputeSteering()` returns wheel angle from look-ahead point |
 
 ---
-
-## Will Be Added in Future
-
-- [ ] **Live simulation** — tick-by-tick vehicle dynamics integration, vehicle moves along path in real time
-- [ ] **Vehicle body rendering** — draw the vehicle footprint (wheelbase + overhangs) on the map as it moves
-- [ ] **Telemetry panel** — real-time display of speed, steering angle, lateral error, and look-ahead point in the right panel
-- [ ] **More path-tracking algorithms** — Stanley controller, MPC (Model Predictive Control), LQR
-- [ ] **Path planning** — generate paths automatically (A*, RRT, Hybrid A*) instead of loading pre-computed JSON waypoints
-- [ ] **Algorithm parameter tuning** — sliders/inputs for look-ahead distance, wheelbase override, gain values
-- [ ] **Obstacle shapes** — support circle and polygon shapes in addition to axis-aligned rectangles
-- [ ] **Multiple vehicle comparison** — run two algorithms side-by-side on the same map
-- [ ] **Export / Save results** — write simulation trajectory and telemetry to CSV or JSON
-- [ ] **Map editor** — draw obstacles and waypoints interactively in the simulation screen
