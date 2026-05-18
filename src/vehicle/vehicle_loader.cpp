@@ -130,10 +130,11 @@ bool VehicleLoader::Load(const std::string& json_path) {
     vehicle_.b    = (float)root.at("b").asFloat();
     vehicle_.CA   = (float)root.at("CA").asFloat();
 
-    vehicle_.minimum_turning_radius   = (float)root.at("minimum_turning_radius").asFloat();
-    vehicle_.max_steering_wheel_angle = (float)root.at("max_steering_wheel_angle").asFloat();
-    vehicle_.min_steering_wheel_angle = (float)root.at("min_steering_wheel_angle").asFloat();
-    vehicle_.max_steering_wheel_rate  = (float)root.at("max_steering_wheel_rate").asFloat();
+    vehicle_.minimum_turning_radius             = (float)root.at("minimum_turning_radius").asFloat();
+    vehicle_.max_steering_wheel_angle           = (float)root.at("max_steering_wheel_angle").asFloat();
+    vehicle_.min_steering_wheel_angle           = (float)root.at("min_steering_wheel_angle").asFloat();
+    vehicle_.max_steering_wheel_rate            = (float)root.at("max_steering_wheel_rate").asFloat();
+    vehicle_.steering_wheel_to_tire_angle_ratio = (float)root.at("steering_wheel_to_tire_angle_ratio").asFloat();
 
     vehicle_.wheelbase      = (float)root.at("wheelbase").asFloat();
     vehicle_.wheel_radius   = (float)root.at("wheel_radius").asFloat();

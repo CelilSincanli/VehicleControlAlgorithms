@@ -11,10 +11,11 @@ struct VehicleData {
     float CA                   = 0.0f;  // air resistance coefficient [1/m]
 
     // Steering limits
-    float minimum_turning_radius   = 0.0f;  // [m]
-    float max_steering_wheel_angle = 0.0f;  // [deg]
-    float min_steering_wheel_angle = 0.0f;  // [deg]
-    float max_steering_wheel_rate  = 0.0f;  // [deg/s]
+    float minimum_turning_radius              = 0.0f;  // [m]
+    float max_steering_wheel_angle            = 0.0f;  // [deg]
+    float min_steering_wheel_angle            = 0.0f;  // [deg]
+    float max_steering_wheel_rate             = 0.0f;  // [deg/s]
+    float steering_wheel_to_tire_angle_ratio  = 1.0f;  // [dimensionless]
 
     // Geometry
     float wheelbase       = 0.0f;  // [m]

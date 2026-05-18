@@ -11,10 +11,17 @@
 #include <chrono>
 #include <vector>
 
+#include <cmath>
+#include <memory>
+
 #include "dripicon_v2.h"
 #include "dripicon_v2_icons.hpp"
 #include "map/map_loader.hpp"
 #include "vehicle/vehicle_loader.hpp"
+#include "vehicle/vehicle_bicycle_model.hpp"
+#include "vehicle/vehicle_state.hpp"
+#include "path_tracking/pure_pursuit/pure_pursuit.hpp"
+#include "path_tracking/pure_pursuit/pure_pursuit_loader.hpp"
 
 class VehicleControlUI {
 public:
@@ -57,11 +64,35 @@ private:
     enum Screen { MAIN_SCREEN, SIMULATION_SCREEN };
     Screen currentScreen;
 
+    enum SimState { SIM_IDLE, SIM_RUNNING, SIM_DONE };
+    SimState simRunState_;
+
+    vehicle::VehicleState                            simVehicleState_;
+    std::unique_ptr<vehicle::KinematicBicycleModel>  simModel_;
+    std::unique_ptr<path_tracking::PurePursuit>      simPursuit_;
+    std::vector<Point2D>                             simScaledPath_;  // in real meters
+    std::vector<float>                               simTraceX_, simTraceY_;  // map units
+    double lastSimTime_;
+    float  simScale_;
+    float  simHalfFront_;   // rear-axle → front bumper  [map units]
+    float  simHalfRear_;    // rear-axle → rear bumper   [map units]
+    float  simHalfWidth_;   // half vehicle width         [map units]
+    float  simWheelbaseMap_;// wheelbase in map units
+    float  simTireHL_;      // tire half-length           [map units]
+    float  simTireHW_;      // tire half-width            [map units]
+    float  simTreadHW_;     // half-tread (axle to tire center) [map units]
+    float  simLastDelta_  = 0.0f;
+    float  simMaxSpeed_   = 3.0f;
+
     void RenderUI();
     void RenderMainScreen();
     void RenderSimulationScreen();
     void ShowNotification(const std::string& title, const std::string& text, float duration_ms);
     void RenderNotification();
+    void ResetSimulation();
+    void InitSimulation();
+    void TickSimulation(float dt);
+    void DrawVehicle(ImDrawList* dl);
 };
 
 #endif // VEHICLE_CONTROL_UI_HPP

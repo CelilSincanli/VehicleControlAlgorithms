@@ -1,0 +1,5 @@
+{
+  "lookahead_distance": 5.0,
+  "lookahead_gain": 0.5,
+  "max_speed": 5.0
+}

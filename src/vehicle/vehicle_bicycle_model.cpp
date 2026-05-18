@@ -19,31 +19,24 @@ VehicleState KinematicBicycleModel::Step(const VehicleState& s,
     const float b  = data_.b;
     const float CA = data_.CA;
 
-    // Clamp steering to physical limits (convert JSON deg limits to rad)
-    const float max_delta = data_.max_steering_wheel_angle
-                            / (L / data_.minimum_turning_radius)
+    // Max front-wheel angle from steering wheel ratio: δ_max = (max_SW_angle / ratio) * π/180
+    const float max_delta = (data_.max_steering_wheel_angle / data_.steering_wheel_to_tire_angle_ratio)
                             * (3.14159265f / 180.0f);
     float delta = std::max(-max_delta, std::min(max_delta, u.steering_angle));
 
-    // Slip angle at COG
-    float beta = std::atan(b / L * std::tan(delta));
-
     float vx = s.speed;
 
-    // Derivatives
-    float dx  = vx * std::cos(s.heading + beta);
-    float dy  = vx * std::sin(s.heading + beta);
-    float dpsi = (std::abs(L) > 1e-6f)
-                 ? vx / L * std::cos(beta) * std::tan(delta)
-                 : 0.0f;
-    float dvx = u.acceleration - CA * vx * std::abs(vx);  // drag opposes motion
+    // Rear-axle-referenced kinematics (standard Pure-Pursuit formulation)
+    float dx   = vx * std::cos(s.heading);
+    float dy   = vx * std::sin(s.heading);
+    float dpsi = (std::abs(L) > 1e-6f) ? vx / L * std::tan(delta) : 0.0f;
+    float dvx  = u.acceleration - CA * vx * std::abs(vx);
 
     VehicleState next;
-    next.x       = s.x       + dx   * dt;
-    next.y       = s.y       + dy   * dt;
-    next.heading = s.heading + dpsi * dt;
-    next.speed   = std::max(0.0f, vx + dvx * dt);
-    // lateral_speed and yaw_rate are zero in the kinematic model
+    next.x             = s.x       + dx   * dt;
+    next.y             = s.y       + dy   * dt;
+    next.heading       = s.heading + dpsi * dt;
+    next.speed         = std::max(0.0f, vx + dvx * dt);
     next.lateral_speed = 0.0f;
     next.yaw_rate      = dpsi;
     return next;

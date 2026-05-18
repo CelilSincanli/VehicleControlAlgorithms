@@ -1,13 +1,50 @@
 {
   "name": "Sine Wave Course",
-  "world": { "width": 12.0, "height": 5.0 },
-  "start": { "x": 0.5, "y": 2.5 },
-  "goal":  { "x": 11.5, "y": 2.5 },
-  "vehicle_radius": 0.2,
+  "world": {
+    "width": 120.0,
+    "height": 120.0
+  },
+  "start": {
+    "x": 6.0,
+    "y": 60.0
+  },
+  "goal": {
+    "x": 114.0,
+    "y": 60.0
+  },
+  "vehicle_radius": 1.2,
   "obstacles": [
-    { "id": "peak_baffle_1",   "shape": "rectangle", "x": 1.8, "y": 0.0, "width": 0.6, "height": 3.0 },
-    { "id": "trough_baffle_1", "shape": "rectangle", "x": 4.3, "y": 2.0, "width": 0.6, "height": 3.0 },
-    { "id": "peak_baffle_2",   "shape": "rectangle", "x": 7.3, "y": 0.0, "width": 0.6, "height": 3.0 },
-    { "id": "trough_baffle_2", "shape": "rectangle", "x": 9.8, "y": 2.0, "width": 0.6, "height": 3.0 }
+    {
+      "id": "peak_baffle_1",
+      "shape": "rectangle",
+      "x": 17.0,
+      "y": 0.0,
+      "width": 5.0,
+      "height": 72.0
+    },
+    {
+      "id": "trough_baffle_1",
+      "shape": "rectangle",
+      "x": 44.0,
+      "y": 48.0,
+      "width": 5.0,
+      "height": 72.0
+    },
+    {
+      "id": "peak_baffle_2",
+      "shape": "rectangle",
+      "x": 71.0,
+      "y": 0.0,
+      "width": 5.0,
+      "height": 72.0
+    },
+    {
+      "id": "trough_baffle_2",
+      "shape": "rectangle",
+      "x": 98.0,
+      "y": 48.0,
+      "width": 5.0,
+      "height": 72.0
+    }
   ]
 }

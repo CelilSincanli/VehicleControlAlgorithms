@@ -17,7 +17,11 @@ VehicleControlUI::VehicleControlUI()
     : window(nullptr), mainFont(nullptr), headingFont(nullptr),
       iconFont(nullptr), iconFont2(nullptr),
       vehicleSelected(false), algorithmSelected(false), pathSelected(false),
-      currentScreen(MAIN_SCREEN) {}
+      currentScreen(MAIN_SCREEN),
+      simRunState_(SIM_IDLE), simVehicleState_{}, simModel_(nullptr), simPursuit_(nullptr),
+      lastSimTime_(0.0), simScale_(1.0f),
+      simHalfFront_(0.0f), simHalfRear_(0.0f), simHalfWidth_(0.0f),
+      simWheelbaseMap_(0.0f), simTireHL_(0.0f), simTireHW_(0.0f), simTreadHW_(0.0f) {}
 
 VehicleControlUI::~VehicleControlUI() {
     Cleanup();
@@ -184,6 +188,7 @@ void VehicleControlUI::RenderMainScreen() {
             if (ImGui::Selectable(label.c_str())) {
                 if (vehicle_loader_.Load(path)) {
                     vehicleSelected = true;
+                    ResetSimulation();
                 }
                 ImGui::CloseCurrentPopup();
             }
@@ -225,6 +230,7 @@ void VehicleControlUI::RenderMainScreen() {
             if (ImGui::Selectable(name.c_str())) {
                 selectedAlgorithm_ = name;
                 algorithmSelected  = true;
+                ResetSimulation();
                 ImGui::CloseCurrentPopup();
             }
         }
@@ -272,6 +278,7 @@ void VehicleControlUI::RenderMainScreen() {
             if (ImGui::Selectable(label.c_str())) {
                 if (map_loader_.Load(dir)) {
                     pathSelected = true;
+                    ResetSimulation();
                 }
                 ImGui::CloseCurrentPopup();
             }
@@ -300,6 +307,174 @@ void VehicleControlUI::RenderMainScreen() {
     ImGui::EndDisabled();
 }
 
+void VehicleControlUI::ResetSimulation() {
+    simRunState_     = SIM_IDLE;
+    simVehicleState_ = {};
+    simLastDelta_    = 0.0f;
+    simModel_.reset();
+    simPursuit_.reset();
+    simScaledPath_.clear();
+    simTraceX_.clear();
+    simTraceY_.clear();
+    lastSimTime_     = 0.0;
+}
+
+void VehicleControlUI::InitSimulation() {
+    const VehicleData& vd  = vehicle_loader_.GetVehicle();
+    const MapData&  map  = map_loader_.GetMap();
+    const PathData& path = map_loader_.GetPath();
+
+    // Load pure pursuit config from JSON; wheelbase always comes from vehicle
+    auto fcfg = path_tracking::LoadPurePursuitConfig(
+                    std::string(CONFIG_PATH) + "/path_tracking/pure_pursuit.json");
+    simMaxSpeed_ = fcfg.max_speed_mps;
+
+    // simScale_: map_units = real_meters * simScale_
+    float real_half_w  = vd.wheel_tread * 0.5f + std::max(vd.left_overhang, vd.right_overhang);
+    simScale_     = map.vehicle_radius / real_half_w;
+
+    // Rear-axle-referenced body dimensions in map units
+    simHalfFront_   = (vd.wheelbase + vd.front_overhang) * simScale_;  // rear-axle → front bumper
+    simHalfRear_    = vd.rear_overhang * simScale_;                     // rear-axle → rear bumper
+    simHalfWidth_   = real_half_w * simScale_;                          // == map.vehicle_radius
+    simWheelbaseMap_= vd.wheelbase * simScale_;
+
+    // Tire visual dimensions in map units
+    simTireHL_   = vd.wheel_radius * simScale_;
+    simTireHW_   = vd.wheel_width  * 0.5f * simScale_;
+    simTreadHW_  = vd.wheel_tread  * 0.5f * simScale_;
+
+    // Vehicle state in REAL METERS (rear axle reference)
+    simVehicleState_         = {};
+    simVehicleState_.x       = map.start.x / simScale_;
+    simVehicleState_.y       = map.start.y / simScale_;
+    simVehicleState_.heading = 0.0f;
+    simVehicleState_.speed   = 0.0f;
+    simLastDelta_            = 0.0f;
+
+    // Convert path waypoints to real meters
+    simScaledPath_.clear();
+    for (const auto& wp : path.waypoints)
+        simScaledPath_.push_back({wp.x / simScale_, wp.y / simScale_});
+
+    simTraceX_.clear();
+    simTraceY_.clear();
+    simTraceX_.push_back(map.start.x);
+    simTraceY_.push_back(map.start.y);
+
+    simModel_ = std::make_unique<vehicle::KinematicBicycleModel>(vd);
+
+    path_tracking::PurePursuitConfig cfg;
+    cfg.lookahead_distance = fcfg.lookahead_distance;
+    cfg.lookahead_gain     = fcfg.lookahead_gain;
+    cfg.wheelbase          = vd.wheelbase; // always from vehicle data
+    simPursuit_ = std::make_unique<path_tracking::PurePursuit>(cfg);
+    simPursuit_->SetPath(simScaledPath_);
+}
+
+void VehicleControlUI::TickSimulation(float dt) {
+    if (simRunState_ != SIM_RUNNING || !simModel_ || !simPursuit_) return;
+
+    // Goal in real meters
+    const MapData& map = map_loader_.GetMap();
+    float gx = map.goal.x / simScale_;
+    float gy = map.goal.y / simScale_;
+    float dx = gx - simVehicleState_.x;
+    float dy = gy - simVehicleState_.y;
+    if (dx*dx + dy*dy < 1.0f) { simRunState_ = SIM_DONE; return; }  // 1 m radius
+
+    float delta = simPursuit_->ComputeSteering(simVehicleState_);
+    simLastDelta_ = delta;
+
+    vehicle::VehicleControls ctrl;
+    ctrl.steering_angle = delta;
+    ctrl.acceleration   = 1.0f * (simMaxSpeed_ - simVehicleState_.speed);
+
+    simVehicleState_ = simModel_->Step(simVehicleState_, ctrl, dt);
+
+    // Record trace dot every 0.5 m of travel (in map units)
+    float nx = simVehicleState_.x * simScale_;
+    float ny = simVehicleState_.y * simScale_;
+    if (simTraceX_.empty()) {
+        simTraceX_.push_back(nx);
+        simTraceY_.push_back(ny);
+    } else {
+        float ldx = nx - simTraceX_.back();
+        float ldy = ny - simTraceY_.back();
+        if (ldx*ldx + ldy*ldy >= 0.25f) {
+            simTraceX_.push_back(nx);
+            simTraceY_.push_back(ny);
+        }
+    }
+}
+
+void VehicleControlUI::DrawVehicle(ImDrawList* dl) {
+    // Rear-axle position in map units
+    float rax = simVehicleState_.x * simScale_;
+    float ray  = simVehicleState_.y * simScale_;
+    float psi  = simVehicleState_.heading;
+
+    float lx =  std::cos(psi), ly =  std::sin(psi);   // forward unit (vehicle)
+    float wx = -std::sin(psi), wy =  std::cos(psi);   // left-lateral unit (vehicle)
+
+    // Helper: plot-point from rear-axle origin with forward/lateral offsets in map units
+    auto pp = [&](float fwd, float lat) -> ImVec2 {
+        return ImPlot::PlotToPixels(rax + fwd*lx + lat*wx,
+                                    ray + fwd*ly + lat*wy);
+    };
+
+    // --- Vehicle body rectangle (rear-axle referenced) ---
+    ImVec2 FL = pp( simHalfFront_,  simHalfWidth_);
+    ImVec2 FR = pp( simHalfFront_, -simHalfWidth_);
+    ImVec2 RR = pp(-simHalfRear_,  -simHalfWidth_);
+    ImVec2 RL = pp(-simHalfRear_,   simHalfWidth_);
+    dl->AddQuadFilled(FL, FR, RR, RL, IM_COL32(30, 100, 255,  90));
+    dl->AddQuad      (FL, FR, RR, RL, IM_COL32(60, 160, 255, 230), 2.0f);
+
+    // --- Tires ---
+    // Tire helper: draw one tire centered at (cx_m, cy_m) rotated by tire_psi
+    auto drawTire = [&](float cx_m, float cy_m, float tire_psi) {
+        float tlx =  std::cos(tire_psi), tly =  std::sin(tire_psi);
+        float twx = -std::sin(tire_psi), twy =  std::cos(tire_psi);
+        auto tc = [&](float f, float s) -> ImVec2 {
+            return ImPlot::PlotToPixels(cx_m + f*tlx + s*twx,
+                                        cy_m + f*tly + s*twy);
+        };
+        ImVec2 A = tc( simTireHL_,  simTireHW_);
+        ImVec2 B = tc( simTireHL_, -simTireHW_);
+        ImVec2 C = tc(-simTireHL_, -simTireHW_);
+        ImVec2 D = tc(-simTireHL_,  simTireHW_);
+        dl->AddQuadFilled(A, B, C, D, IM_COL32(20, 20, 20, 210));
+        dl->AddQuad      (A, B, C, D, IM_COL32(80, 80, 80, 255), 1.0f);
+    };
+
+    // Rear tires (at rear axle, aligned with body heading)
+    float rL_x = rax + simTreadHW_ * wx;
+    float rL_y = ray + simTreadHW_ * wy;
+    float rR_x = rax - simTreadHW_ * wx;
+    float rR_y = ray - simTreadHW_ * wy;
+    drawTire(rL_x, rL_y, psi);
+    drawTire(rR_x, rR_y, psi);
+
+    // Front tires (at front axle, rotated by steering angle delta)
+    float fax = rax + simWheelbaseMap_ * lx;
+    float fay = ray + simWheelbaseMap_ * ly;
+    float fL_x = fax + simTreadHW_ * wx;
+    float fL_y = fay + simTreadHW_ * wy;
+    float fR_x = fax - simTreadHW_ * wx;
+    float fR_y = fay - simTreadHW_ * wy;
+    drawTire(fL_x, fL_y, psi + simLastDelta_);
+    drawTire(fR_x, fR_y, psi + simLastDelta_);
+
+    // --- Lookahead target dot + line from rear axle ---
+    Point2D lh   = simPursuit_->GetLookaheadPoint();
+    ImVec2 lhPx  = ImPlot::PlotToPixels(lh.x * simScale_, lh.y * simScale_);
+    ImVec2 raPx  = ImPlot::PlotToPixels(rax, ray);
+    dl->AddLine        (raPx, lhPx, IM_COL32(100, 180, 255, 160), 1.5f);
+    dl->AddCircleFilled(lhPx, 6.0f, IM_COL32(255, 220, 50, 220));
+    dl->AddCircle      (lhPx, 6.0f, IM_COL32(255, 255, 255, 180), 12, 1.5f);
+}
+
 void VehicleControlUI::RenderSimulationScreen() {
     ImGui::Spacing();
 
@@ -321,11 +496,20 @@ void VehicleControlUI::RenderSimulationScreen() {
     {
         ImGui::PushFont(iconFont2);
         if (ImGui::Button("U", ImVec2(50.0f, 35.0f))) {
+            ResetSimulation();
             currentScreen = MAIN_SCREEN;
         }
         ImGui::PopFont();
     }
     ImGui::EndChild();
+
+    // Per-frame simulation tick
+    if (simRunState_ == SIM_RUNNING) {
+        double now = glfwGetTime();
+        float dt = std::min((float)(now - lastSimTime_), 0.1f);
+        lastSimTime_ = now;
+        TickSimulation(dt);
+    }
 
     // Cartesian map
     ImGui::SetCursorPos(ImVec2((screenWidth - frameWidth2) * 0.015f, frameHeight1 + 20.0f));
@@ -333,7 +517,7 @@ void VehicleControlUI::RenderSimulationScreen() {
     {
         ImVec2 availableSize = ImGui::GetContentRegionAvail();
         if (ImPlot::BeginPlot("Vehicle Control Algorithms", availableSize,
-                ImPlotFlags_NoLegend | ImPlotFlags_NoFrame | ImPlotFlags_NoMenus)) {
+                ImPlotFlags_NoFrame | ImPlotFlags_NoMenus | ImPlotFlags_Equal)) {
             const MapData& map  = map_loader_.GetMap();
             const PathData& path = map_loader_.GetPath();
 
@@ -372,6 +556,16 @@ void VehicleControlUI::RenderSimulationScreen() {
                 ImPlot::PlotScatter("Goal", &gx, &gy, 1);
             }
 
+            if (simRunState_ != SIM_IDLE && !simTraceX_.empty()) {
+                ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle, 4.0f,
+                    ImVec4(0.3f, 0.55f, 1.0f, 0.75f), 0.0f,
+                    ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+                ImPlot::PlotScatter("Trace", simTraceX_.data(), simTraceY_.data(),
+                                    (int)simTraceX_.size());
+                ImDrawList* dl = ImPlot::GetPlotDrawList();
+                DrawVehicle(dl);
+            }
+
             ImPlot::EndPlot();
         }
     }
@@ -388,6 +582,41 @@ void VehicleControlUI::RenderSimulationScreen() {
         float buttonWidth  = textSize.x * 4.0f;
         float buttonHeight = textSize.y * 2.0f;
         float buttonX      = (frameWidth3 - buttonWidth) * 0.5f;
+
+        // Start / Stop / Restart button near top
+        const char* simBtnLabel = (simRunState_ == SIM_RUNNING) ? "Stop"
+                                : (simRunState_ == SIM_DONE)    ? "Restart"
+                                :                                 "Start Simulation";
+        ImGui::SetCursorPos(ImVec2(buttonX, 20.0f));
+        if (ImGui::Button(simBtnLabel, ImVec2(buttonWidth, buttonHeight))) {
+            if (simRunState_ == SIM_RUNNING) {
+                simRunState_ = SIM_IDLE;
+            } else {
+                InitSimulation();
+                simRunState_ = SIM_RUNNING;
+                lastSimTime_ = glfwGetTime();
+            }
+        }
+
+        // Vehicle info panel
+        float infoY = buttonHeight + 40.0f;
+        ImGui::SetCursorPos(ImVec2(10.0f, infoY));
+        ImGui::Separator();
+        ImGui::SetCursorPos(ImVec2(10.0f, infoY + 8.0f));
+        ImGui::TextColored(ImVec4(0.7f, 0.9f, 1.0f, 1.0f), "Vehicle Info");
+        ImGui::SetCursorPos(ImVec2(10.0f, infoY + 30.0f));
+        ImGui::Text("Speed : %.1f km/h", simVehicleState_.speed * 3.6f);
+        ImGui::SetCursorPos(ImVec2(10.0f, infoY + 52.0f));
+        const char* statusStr = (simRunState_ == SIM_RUNNING) ? "Running"
+                              : (simRunState_ == SIM_DONE)    ? "Done"
+                              :                                 "Idle";
+        ImVec4 statusColor = (simRunState_ == SIM_RUNNING) ? ImVec4(0.2f, 0.9f, 0.4f, 1.0f)
+                           : (simRunState_ == SIM_DONE)    ? ImVec4(1.0f, 0.7f, 0.2f, 1.0f)
+                           :                                  ImVec4(0.6f, 0.6f, 0.6f, 1.0f);
+        ImGui::Text("Status:");
+        ImGui::SameLine();
+        ImGui::TextColored(statusColor, "%s", statusStr);
+
         float buttonY      = frameHeight3 - buttonHeight - 20.0f;
 
         ImGui::SetCursorPos(ImVec2(buttonX, buttonY));
