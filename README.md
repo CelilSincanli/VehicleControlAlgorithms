@@ -81,6 +81,58 @@ make -j$(nproc)
 
 ---
 
+## Example Usage
+
+### 1. Launch and configure
+
+On startup the main menu presents four steps. **Start Simulation** stays disabled until all three selections have been made.
+
+![Main Menu](docs/pics/menu/main_menu.png)
+
+---
+
+### 2. Select a vehicle
+
+Click **Select Vehicle** to open the picker. All JSON files found under `data/vehicle/` are listed automatically. Select `vehicle01` to load the Bus 01 model.
+
+![Select Vehicle](docs/pics/menu/select_vehicle.png)
+
+---
+
+### 3. Select an algorithm
+
+Click **Select Algorithm** and choose the path-tracking controller to use. Currently **Pure Pursuit** is available.
+
+![Select Algorithm](docs/pics/menu/select_algorithm.png)
+
+---
+
+### 4. Select a map
+
+Click **Select Map** to see all map directories discovered under `data/maps/`. Choose `map_01` (Corridor Map) or `map_02` (Sine Wave Course).
+
+![Select Map](docs/pics/menu/select_map.png)
+
+---
+
+### 5. Simulation screen — ready
+
+Once all three selections are confirmed, click **Start Simulation** from the main menu to enter the simulation screen. The 120 m × 120 m map is drawn with obstacles (grey), the reference path (green), the start marker (circle) and the goal marker (square). The right panel shows vehicle speed and status. Click **Start Simulation** in the right panel to begin.
+
+![Simulation Screen](docs/pics/simulation/simulation.png)
+
+---
+
+### 6. Pure Pursuit running
+
+With the simulation running the vehicle (blue rectangle) follows the reference path. The yellow dot is the current lookahead target; the blue dot trail shows where the rear axle has been. Speed and status update in real time in the right panel. Click **Stop** to pause or **Restart** to run again from the start position.
+
+![Pure Pursuit Running](docs/pics/path_tracking/pure_pursuit/pure_pursuit.png)
+
+> A screen-capture video of the full run is available at `docs/pics/path_tracking/pure_pursuit/pure_pursuit.mp4`.
+
+---
+
 ## Adding a New Map
 
 1. Create a directory under `data/maps/`, e.g. `data/maps/map_03/`.
@@ -174,8 +226,8 @@ Create a JSON file under `data/vehicle/`, e.g. `data/vehicle/vehicle02.json`:
 
 | Map | Description |
 |-----|-------------|
-| **map_01** — Corridor Map | Straight corridor with three pairs of offset wall segments. Tests basic gap navigation. |
-| **map_02** — Sine Wave Course | Two-period sinusoidal weave (amplitude ±1.5 m, period 5.5 m). Four alternating baffles force the path high and low. |
+| **map_01** — Corridor Map | 120 m × 120 m. Three pairs of offset wall segments create a slalom. Tests gap navigation with large heading changes. |
+| **map_02** — Sine Wave Course | 120 m × 120 m. Two-period sinusoidal weave (amplitude ±24 m, period 54 m). Four alternating baffles force the path high and low. |
 
 ---
 
