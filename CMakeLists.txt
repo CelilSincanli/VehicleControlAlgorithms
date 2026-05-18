@@ -12,7 +12,8 @@ add_definitions(-DDATA_PATH="${CMAKE_SOURCE_DIR}/data")
 add_executable(${PROJECT_NAME}
     src/main.cpp
     src/vehicle_control_ui.cpp
-    src/map_loader.cpp
+    src/map/map_loader.cpp
+    src/path_tracking/pure_pursuit/pure_pursuit.cpp
     include/third_parties/imgui/imgui.cpp
     include/third_parties/imgui/imgui_draw.cpp
     include/third_parties/imgui/imgui_tables.cpp
@@ -25,6 +26,8 @@ add_executable(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/map
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/path_tracking/pure_pursuit
     ${CMAKE_CURRENT_SOURCE_DIR}/include/third_parties/imgui
     ${CMAKE_CURRENT_SOURCE_DIR}/include/third_parties/imgui/backends
     ${CMAKE_CURRENT_SOURCE_DIR}/include/third_parties/implot

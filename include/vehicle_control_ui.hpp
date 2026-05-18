@@ -13,7 +13,7 @@
 
 #include "dripicon_v2.h"
 #include "dripicon_v2_icons.hpp"
-#include "map_loader.hpp"
+#include "map/map_loader.hpp"
 
 class VehicleControlUI {
 public:
@@ -36,6 +36,9 @@ private:
 
     MapLoader                map_loader_;
     std::vector<std::string> available_maps_;
+
+    std::string              selectedAlgorithm_;
+    static const std::vector<std::string> kAvailableAlgorithms;
 
     struct Notification {
         std::string title;

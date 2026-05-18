@@ -5,15 +5,11 @@
 
 class MapLoader {
 public:
-    // Load map.json + path.json from the given directory.
-    // Returns true only if both files parsed successfully.
     bool Load(const std::string& map_dir);
 
     const MapData&  GetMap()  const { return map_;  }
     const PathData& GetPath() const { return path_; }
 
-    // Scan maps_root for sub-directories that contain both
-    // map.json and path.json.  Returns sorted list of absolute paths.
     static std::vector<std::string> DiscoverMaps(const std::string& maps_root);
 
 private:

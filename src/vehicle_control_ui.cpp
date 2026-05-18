@@ -1,6 +1,10 @@
 #include "vehicle_control_ui.hpp"
-#include "map_data.hpp"
+#include "map/map_data.hpp"
 #include <filesystem>
+
+const std::vector<std::string> VehicleControlUI::kAvailableAlgorithms = {
+    "Pure Pursuit",
+};
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -150,13 +154,36 @@ void VehicleControlUI::RenderMainScreen() {
     ImGui::PopFont();
     ImGui::SameLine();
     if (ImGui::Button("Select Algorithm", ImVec2(button_width, button_height))) {
-        algorithmSelected = true;
+        ImGui::OpenPopup("Select Algorithm##popup");
     }
     if (algorithmSelected) {
         ImGui::SameLine();
         ImGui::PushFont(iconFont2);
         ImGui::TextColored(ImVec4(0.2f, 0.8f, 0.2f, 1.0f), "%s", dripicon_v2::checkmark);
         ImGui::PopFont();
+        ImGui::SameLine();
+        ImGui::TextDisabled("(%s)", selectedAlgorithm_.c_str());
+    }
+
+    // Algorithm selector popup
+    ImGui::SetNextWindowSize(ImVec2(320, 0), ImGuiCond_Always);
+    if (ImGui::BeginPopupModal("Select Algorithm##popup", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::Text("Available Algorithms");
+        ImGui::Separator();
+        ImGui::BeginChild("##algolist", ImVec2(300, 180), true);
+        for (const auto& name : kAvailableAlgorithms) {
+            if (ImGui::Selectable(name.c_str())) {
+                selectedAlgorithm_ = name;
+                algorithmSelected  = true;
+                ImGui::CloseCurrentPopup();
+            }
+        }
+        ImGui::EndChild();
+        ImGui::Spacing();
+        if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
     }
 
     // Button 2: Select Map
