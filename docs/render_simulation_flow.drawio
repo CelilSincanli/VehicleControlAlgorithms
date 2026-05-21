@@ -1,0 +1,487 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="RenderSimulationScreen Flow" id="render-sim-flow">
+    <mxGraphModel dx="222" dy="115" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="2339" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="10" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="UI / Main Screen" vertex="1">
+          <mxGeometry height="1820" width="350" x="10" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="101" parent="10" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;arcSize=25;" value="App Launch" vertex="1">
+          <mxGeometry height="40" width="280" x="32.5" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="102" parent="10" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Main Screen" vertex="1">
+          <mxGeometry height="40" width="280" x="32.5" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="103" parent="10" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="User selects map" vertex="1">
+          <mxGeometry height="40" width="280" x="32.5" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="104" parent="10" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="MapLoader::Load(directory)&#xa;→ ParseMap(map.json) + ParsePath(path.json)" vertex="1">
+          <mxGeometry height="55" width="280" x="32.5" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="105" parent="10" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontColor=#333333;fontStyle=2;" value="MapData: obstacles[ ], start, goal, world dims&#xa;PathData: waypoints[ ] (x,y)" vertex="1">
+          <mxGeometry height="45" width="280" x="32.5" y="305" as="geometry" />
+        </mxCell>
+        <mxCell id="106" parent="10" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="User selects vehicle" vertex="1">
+          <mxGeometry height="40" width="280" x="32.5" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="107" parent="10" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="VehicleLoader::Load()&#xa;→ VehicleData (mass, wheelbase, L, steering limits…)" vertex="1">
+          <mxGeometry height="55" width="280" x="32.5" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="108" parent="10" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="User selects algorithm" vertex="1">
+          <mxGeometry height="40" width="280" x="32.5" y="505" as="geometry" />
+        </mxCell>
+        <mxCell id="109" parent="10" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="selectedAlgorithm_ = &quot;Pure Pursuit&quot;" vertex="1">
+          <mxGeometry height="40" width="280" x="32.5" y="565" as="geometry" />
+        </mxCell>
+        <mxCell id="110" parent="10" style="rhombus;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Map + Vehicle +&#xa;Algorithm all selected?" vertex="1">
+          <mxGeometry height="70" width="250" x="47.5" y="625" as="geometry" />
+        </mxCell>
+        <mxCell id="111" parent="10" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="currentScreen = SIMULATION_SCREEN" vertex="1">
+          <mxGeometry height="45" width="280" x="32.5" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="e101" edge="1" parent="10" source="101" style="edgeStyle=orthogonalEdgeStyle;" target="102">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e102" edge="1" parent="10" source="102" style="edgeStyle=orthogonalEdgeStyle;" target="103">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e103" edge="1" parent="10" source="103" style="edgeStyle=orthogonalEdgeStyle;" target="104">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e104" edge="1" parent="10" source="104" style="edgeStyle=orthogonalEdgeStyle;" target="105">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e105" edge="1" parent="10" source="105" style="edgeStyle=orthogonalEdgeStyle;" target="106">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e106" edge="1" parent="10" source="106" style="edgeStyle=orthogonalEdgeStyle;" target="107">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e107" edge="1" parent="10" source="107" style="edgeStyle=orthogonalEdgeStyle;" target="108">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e108" edge="1" parent="10" source="108" style="edgeStyle=orthogonalEdgeStyle;" target="109">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e109" edge="1" parent="10" source="109" style="edgeStyle=orthogonalEdgeStyle;" target="110">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e110" edge="1" parent="10" source="110" style="edgeStyle=orthogonalEdgeStyle;" target="111" value="YES">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e111" edge="1" parent="10" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="102" value="NO">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="330" y="660" />
+              <mxPoint x="330" y="120" />
+            </Array>
+            <mxPoint x="310" y="659.99" as="sourcePoint" />
+            <mxPoint x="325" y="119.99" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="20" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;" value="Simulation Init  —  InitSimulation()" vertex="1">
+          <mxGeometry height="1820" width="360" x="370" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="201" parent="20" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;arcSize=25;" value="InitSimulation()" vertex="1">
+          <mxGeometry height="50" width="290" x="35" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="202" parent="20" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="map_loader_.GetMap()  /  GetPath()&#xa;Retrieve MapData + PathData" vertex="1">
+          <mxGeometry height="50" width="290" x="35" y="770" as="geometry" />
+        </mxCell>
+        <mxCell id="203" parent="20" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Compute simScale_&#xa;(world_width / vehicle reference area)" vertex="1">
+          <mxGeometry height="50" width="290" x="35" y="840" as="geometry" />
+        </mxCell>
+        <mxCell id="204" parent="20" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Scale waypoints&#xa;simScaledPath_ ← waypoints × simScale_" vertex="1">
+          <mxGeometry height="50" width="290" x="35" y="910" as="geometry" />
+        </mxCell>
+        <mxCell id="205" parent="20" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Create KinematicBicycleModel(vd)&#xa;simModel_ = make_unique&lt;&gt;(vd)" vertex="1">
+          <mxGeometry height="55" width="290" x="35" y="980" as="geometry" />
+        </mxCell>
+        <mxCell id="206" parent="20" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Load PurePursuitConfig from JSON&#xa;lookahead_distance, lookahead_gain, wheelbase" vertex="1">
+          <mxGeometry height="55" width="290" x="35" y="1055" as="geometry" />
+        </mxCell>
+        <mxCell id="207" parent="20" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Create PurePursuit(cfg)&#xa;simPursuit_ = make_unique&lt;&gt;(cfg)" vertex="1">
+          <mxGeometry height="50" width="290" x="35" y="1130" as="geometry" />
+        </mxCell>
+        <mxCell id="208" parent="20" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="simPursuit_-&gt;SetPath(simScaledPath_)" vertex="1">
+          <mxGeometry height="40" width="290" x="35" y="1200" as="geometry" />
+        </mxCell>
+        <mxCell id="209" parent="20" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Set initial VehicleState&#xa;x = map.start.x,  y = map.start.y,  speed = 0" vertex="1">
+          <mxGeometry height="55" width="290" x="35" y="1260" as="geometry" />
+        </mxCell>
+        <mxCell id="210" parent="20" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" value="simRunState_ = SIM_RUNNING&#xa;lastSimTime_ = glfwGetTime()" vertex="1">
+          <mxGeometry height="50" width="290" x="35" y="1335" as="geometry" />
+        </mxCell>
+        <mxCell id="e201" edge="1" parent="20" source="201" style="edgeStyle=orthogonalEdgeStyle;" target="202">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e202" edge="1" parent="20" source="202" style="edgeStyle=orthogonalEdgeStyle;" target="203">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e203" edge="1" parent="20" source="203" style="edgeStyle=orthogonalEdgeStyle;" target="204">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e204" edge="1" parent="20" source="204" style="edgeStyle=orthogonalEdgeStyle;" target="205">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e205" edge="1" parent="20" source="205" style="edgeStyle=orthogonalEdgeStyle;" target="206">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e206" edge="1" parent="20" source="206" style="edgeStyle=orthogonalEdgeStyle;" target="207">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e207" edge="1" parent="20" source="207" style="edgeStyle=orthogonalEdgeStyle;" target="208">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e208" edge="1" parent="20" source="208" style="edgeStyle=orthogonalEdgeStyle;" target="209">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e209" edge="1" parent="20" source="209" style="edgeStyle=orthogonalEdgeStyle;" target="210">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="30" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;fillColor=#fff2cc;strokeColor=#d6b656;" value="RenderSimulationScreen()  —  per frame" vertex="1">
+          <mxGeometry height="1820" width="390" x="740" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="301" parent="30" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;arcSize=25;" value="RenderSimulationScreen()" vertex="1">
+          <mxGeometry height="50" width="320" x="35" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="302" parent="30" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Compute layout sizes from DisplaySize&#xa;frameW1=99%  frameW2=72%  frameW3=25%&#xa;frameH1=6%   frameH2=frameH3=88%" vertex="1">
+          <mxGeometry height="65" width="320" x="35" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="303" parent="30" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="BeginChild &quot;FrameArea&quot;  (header bar, 6% height)" vertex="1">
+          <mxGeometry height="45" width="320" x="35" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="304" parent="30" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Back button &#39;U&#39;&#xa;clicked?" vertex="1">
+          <mxGeometry height="70" width="240" x="75" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="305" parent="30" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="ResetSimulation()&#xa;currentScreen = MAIN_SCREEN  →  exit" vertex="1">
+          <mxGeometry height="50" width="320" x="35" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="306" parent="30" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="simRunState_&#xa;== SIM_RUNNING?" vertex="1">
+          <mxGeometry height="70" width="240" x="75" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="307" parent="30" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="dt = glfwGetTime() - lastSimTime_&#xa;dt = min(dt, 0.1 s)" vertex="1">
+          <mxGeometry height="50" width="320" x="35" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="308" parent="30" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="BeginChild &quot;CoordinateFrame&quot;  (72% width)&#xa;ImPlot::BeginPlot(&quot;Vehicle Control Algorithms&quot;)" vertex="1">
+          <mxGeometry height="55" width="320" x="35" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="309" parent="30" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="SetupAxes(X-Axis, Y-Axis)&#xa;SetupAxisLimits(0..world_w, 0..world_h)" vertex="1">
+          <mxGeometry height="50" width="320" x="35" y="665" as="geometry" />
+        </mxCell>
+        <mxCell id="310" parent="30" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="map.loaded?" vertex="1">
+          <mxGeometry height="65" width="220" x="95" y="735" as="geometry" />
+        </mxCell>
+        <mxCell id="311" parent="30" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Draw obstacle rectangles&#xa;(grey fill IM_COL32(100,100,120) via ImDrawList)" vertex="1">
+          <mxGeometry height="50" width="320" x="35" y="820" as="geometry" />
+        </mxCell>
+        <mxCell id="312" parent="30" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="path.loaded?" vertex="1">
+          <mxGeometry height="65" width="220" x="95" y="890" as="geometry" />
+        </mxCell>
+        <mxCell id="313" parent="30" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Draw path polyline (green 2 px)&#xa;ImPlot::PlotLine(&quot;Path&quot;, px, py)" vertex="1">
+          <mxGeometry height="50" width="320" x="35" y="975" as="geometry" />
+        </mxCell>
+        <mxCell id="314" parent="30" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Draw Start marker (green circle, r=10)&#xa;Draw Goal marker (red square, r=10)" vertex="1">
+          <mxGeometry height="50" width="320" x="35" y="1045" as="geometry" />
+        </mxCell>
+        <mxCell id="315" parent="30" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="simRunState_&#xa;!= SIM_IDLE?" vertex="1">
+          <mxGeometry height="70" width="240" x="75" y="1115" as="geometry" />
+        </mxCell>
+        <mxCell id="316" parent="30" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Draw trace scatter (blue circles)&#xa;ImPlot::PlotScatter(&quot;Trace&quot;, simTraceX_, simTraceY_)" vertex="1">
+          <mxGeometry height="50" width="320" x="35" y="1205" as="geometry" />
+        </mxCell>
+        <mxCell id="317" parent="30" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;" value="DrawVehicle(ImDrawList*)&#xa;vehicle_control_ui.cpp:411" vertex="1">
+          <mxGeometry height="50" width="320" x="35" y="1275" as="geometry" />
+        </mxCell>
+        <mxCell id="318" parent="30" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fffde7;strokeColor=#d6b656;fontStyle=2;align=left;" value="• Body rect  (rear-axle origin, rotated by heading ψ)&#xa;• Rear tires ×2  (body-aligned)&#xa;• Front tires ×2  (rotated by steering angle δ)&#xa;• Lookahead line → last_lookahead_ point (yellow dot)" vertex="1">
+          <mxGeometry height="80" width="320" x="35" y="1345" as="geometry" />
+        </mxCell>
+        <mxCell id="319" parent="30" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="ImPlot::EndPlot()  +  ImGui::EndChild()" vertex="1">
+          <mxGeometry height="45" width="320" x="35" y="1445" as="geometry" />
+        </mxCell>
+        <mxCell id="320" parent="30" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="BeginChild &quot;RightFrame&quot;  (25% width)&#xa;RenderNotification()" vertex="1">
+          <mxGeometry height="50" width="320" x="35" y="1510" as="geometry" />
+        </mxCell>
+        <mxCell id="321" parent="30" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Start / Stop / Restart button&#xa;SIM_RUNNING → &quot;Stop&quot; → SIM_IDLE&#xa;SIM_DONE → &quot;Restart&quot; → InitSimulation()&#xa;else → &quot;Start Simulation&quot; → InitSimulation()" vertex="1">
+          <mxGeometry height="75" width="320" x="35" y="1580" as="geometry" />
+        </mxCell>
+        <mxCell id="322" parent="30" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Info panel labels:&#xa;Algorithm | Vehicle Type | Map&#xa;Speed (km/h) | Status: Idle / Running / Done" vertex="1">
+          <mxGeometry height="65" width="320" x="35" y="1675" as="geometry" />
+        </mxCell>
+        <mxCell id="323" parent="30" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Save Diagram button  (stub — std::cout)" vertex="1">
+          <mxGeometry height="40" width="320" x="35" y="1760" as="geometry" />
+        </mxCell>
+        <mxCell id="e301" edge="1" parent="30" source="301" style="edgeStyle=orthogonalEdgeStyle;" target="302">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e302" edge="1" parent="30" source="302" style="edgeStyle=orthogonalEdgeStyle;" target="303">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e303" edge="1" parent="30" source="303" style="edgeStyle=orthogonalEdgeStyle;" target="304">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e304yes" edge="1" parent="30" source="304" style="edgeStyle=orthogonalEdgeStyle;" target="305" value="YES">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e304no" edge="1" parent="30" source="304" style="edgeStyle=orthogonalEdgeStyle;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="306" value="NO">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="10" y="305" />
+              <mxPoint x="10" y="455" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e306yes" edge="1" parent="30" source="306" style="edgeStyle=orthogonalEdgeStyle;" target="307" value="YES">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e306no" edge="1" parent="30" source="306" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1.001;entryY=0.55;entryDx=0;entryDy=0;entryPerimeter=0;" target="308" value="NO">
+          <mxGeometry relative="1" x="-0.132" y="-5" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="385" y="455" />
+              <mxPoint x="385" y="620" />
+            </Array>
+            <mxPoint x="330.0000000000002" y="455" as="sourcePoint" />
+            <mxPoint x="360" y="620" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e308" edge="1" parent="30" source="308" style="edgeStyle=orthogonalEdgeStyle;" target="309">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e309" edge="1" parent="30" source="309" style="edgeStyle=orthogonalEdgeStyle;" target="310">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e310yes" edge="1" parent="30" source="310" style="edgeStyle=orthogonalEdgeStyle;" target="311" value="YES">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e310no" edge="1" parent="30" source="310" style="edgeStyle=orthogonalEdgeStyle;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="312" value="NO">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="20" y="768" />
+              <mxPoint x="20" y="923" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e311" edge="1" parent="30" source="311" style="edgeStyle=orthogonalEdgeStyle;" target="312">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e312yes" edge="1" parent="30" source="312" style="edgeStyle=orthogonalEdgeStyle;" target="313" value="YES">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e312no" edge="1" parent="30" source="312" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="314" value="NO">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="315" y="920" />
+              <mxPoint x="370" y="920" />
+              <mxPoint x="370" y="1070" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e313" edge="1" parent="30" source="313" style="edgeStyle=orthogonalEdgeStyle;" target="314">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e314" edge="1" parent="30" source="314" style="edgeStyle=orthogonalEdgeStyle;" target="315">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e315yes" edge="1" parent="30" source="315" style="edgeStyle=orthogonalEdgeStyle;" target="316" value="YES">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e315no" edge="1" parent="30" source="315" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="319" value="NO">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="370" y="1150" />
+              <mxPoint x="370" y="1468" />
+              <mxPoint x="355" y="1468" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e316" edge="1" parent="30" source="316" style="edgeStyle=orthogonalEdgeStyle;" target="317">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e317" edge="1" parent="30" source="317" style="edgeStyle=orthogonalEdgeStyle;" target="318">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e318" edge="1" parent="30" source="318" style="edgeStyle=orthogonalEdgeStyle;" target="319">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e319" edge="1" parent="30" source="319" style="edgeStyle=orthogonalEdgeStyle;" target="320">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e320" edge="1" parent="30" source="320" style="edgeStyle=orthogonalEdgeStyle;" target="321">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e321" edge="1" parent="30" source="321" style="edgeStyle=orthogonalEdgeStyle;" target="322">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e322" edge="1" parent="30" source="322" style="edgeStyle=orthogonalEdgeStyle;" target="323">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="40" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;fillColor=#f8cecc;strokeColor=#b85450;" value="TickSimulation(dt)  —  Pure Pursuit + Bicycle Model" vertex="1">
+          <mxGeometry height="1820" width="390" x="1140" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="401" parent="40" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;arcSize=25;" value="TickSimulation(dt)" vertex="1">
+          <mxGeometry height="50" width="320" x="32.5" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="402" parent="40" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;" value="─── Pure Pursuit ───&#xa;ComputeSteering(simVehicleState_)" vertex="1">
+          <mxGeometry height="55" width="320" x="32.5" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="403" parent="40" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="Ld = lookahead_distance + lookahead_gain × |v|&#xa;(adaptive lookahead — grows with speed)" vertex="1">
+          <mxGeometry height="55" width="320" x="32.5" y="615" as="geometry" />
+        </mxCell>
+        <mxCell id="404" parent="40" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="FindClosestWaypoint(state)&#xa;forward search, window = 40 waypoints" vertex="1">
+          <mxGeometry height="55" width="320" x="32.5" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="405" parent="40" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="FindLookaheadPoint(state, closest, Ld)&#xa;walk path forward until dist(wp, pos) ≥ Ld" vertex="1">
+          <mxGeometry height="55" width="320" x="32.5" y="765" as="geometry" />
+        </mxCell>
+        <mxCell id="406" parent="40" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="local_y = −dx·sin(ψ) + dy·cos(ψ)&#xa;cross-track error in vehicle frame" vertex="1">
+          <mxGeometry height="55" width="320" x="32.5" y="840" as="geometry" />
+        </mxCell>
+        <mxCell id="407" parent="40" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;" value="δ = atan2( 2·L·local_y,  Ld² )&#xa;Pure Pursuit steering formula  →  return δ" vertex="1">
+          <mxGeometry height="55" width="320" x="32.5" y="915" as="geometry" />
+        </mxCell>
+        <mxCell id="408" parent="40" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;" value="─── Kinematic Bicycle Model ───&#xa;KinematicBicycleModel::Step(state, ctrl, dt)" vertex="1">
+          <mxGeometry height="60" width="320" x="32.5" y="990" as="geometry" />
+        </mxCell>
+        <mxCell id="409" parent="40" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="Clamp δ:  max_delta = (SW_max / ratio) × π/180&#xa;δ = clamp(δ, −max_delta, +max_delta)" vertex="1">
+          <mxGeometry height="55" width="320" x="32.5" y="1070" as="geometry" />
+        </mxCell>
+        <mxCell id="410" parent="40" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="Kinematics (rear-axle reference):&#xa;dx = v·cos(ψ)     dy = v·sin(ψ)&#xa;dψ = v/L · tan(δ)  dv = accel − CA·v·|v|" vertex="1">
+          <mxGeometry height="70" width="320" x="32.5" y="1145" as="geometry" />
+        </mxCell>
+        <mxCell id="411" parent="40" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="Euler integrate (forward):&#xa;x  += dx·dt       y  += dy·dt&#xa;ψ  += dψ·dt       v   = max(0, v + dv·dt)" vertex="1">
+          <mxGeometry height="70" width="320" x="32.5" y="1235" as="geometry" />
+        </mxCell>
+        <mxCell id="412" parent="40" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;arcSize=25;" value="Return new VehicleState&#xa;→ simVehicleState_ updated" vertex="1">
+          <mxGeometry height="50" width="320" x="32.5" y="1325" as="geometry" />
+        </mxCell>
+        <mxCell id="413" parent="40" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="Accumulate travelled distance since last trace dot" vertex="1">
+          <mxGeometry height="45" width="320" x="32.5" y="1395" as="geometry" />
+        </mxCell>
+        <mxCell id="414" parent="40" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="distance ≥ 0.5 m?" vertex="1">
+          <mxGeometry height="65" width="220" x="82.5" y="1460" as="geometry" />
+        </mxCell>
+        <mxCell id="415" parent="40" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="Push (x, y) to simTraceX_ / simTraceY_&#xa;reset accumulated distance" vertex="1">
+          <mxGeometry height="50" width="320" x="32.5" y="1545" as="geometry" />
+        </mxCell>
+        <mxCell id="416" parent="40" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="dist(pos, goal)&#xa;&lt; 1.0 m?" vertex="1">
+          <mxGeometry height="70" width="220" x="82.5" y="1615" as="geometry" />
+        </mxCell>
+        <mxCell id="417" parent="40" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;" value="simRunState_ = SIM_DONE" vertex="1">
+          <mxGeometry height="45" width="320" x="32.5" y="1705" as="geometry" />
+        </mxCell>
+        <mxCell id="418" parent="40" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;arcSize=25;" value="TickSimulation returns" vertex="1">
+          <mxGeometry height="40" width="320" x="32.5" y="1760" as="geometry" />
+        </mxCell>
+        <mxCell id="e401" edge="1" parent="40" source="401" style="edgeStyle=orthogonalEdgeStyle;" target="402">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e402" edge="1" parent="40" source="402" style="edgeStyle=orthogonalEdgeStyle;" target="403">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e403" edge="1" parent="40" source="403" style="edgeStyle=orthogonalEdgeStyle;" target="404">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e404" edge="1" parent="40" source="404" style="edgeStyle=orthogonalEdgeStyle;" target="405">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e405" edge="1" parent="40" source="405" style="edgeStyle=orthogonalEdgeStyle;" target="406">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e406" edge="1" parent="40" source="406" style="edgeStyle=orthogonalEdgeStyle;" target="407">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e407" edge="1" parent="40" source="407" style="edgeStyle=orthogonalEdgeStyle;" target="408">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e408" edge="1" parent="40" source="408" style="edgeStyle=orthogonalEdgeStyle;" target="409">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e409" edge="1" parent="40" source="409" style="edgeStyle=orthogonalEdgeStyle;" target="410">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e410" edge="1" parent="40" source="410" style="edgeStyle=orthogonalEdgeStyle;" target="411">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e411" edge="1" parent="40" source="411" style="edgeStyle=orthogonalEdgeStyle;" target="412">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e412" edge="1" parent="40" source="412" style="edgeStyle=orthogonalEdgeStyle;" target="413">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e413" edge="1" parent="40" source="413" style="edgeStyle=orthogonalEdgeStyle;" target="414">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e414yes" edge="1" parent="40" source="414" style="edgeStyle=orthogonalEdgeStyle;" target="415" value="YES">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e414no" edge="1" parent="40" source="414" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="416" value="NO">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="372.5" y="1492" />
+              <mxPoint x="372.5" y="1650" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e415" edge="1" parent="40" source="415" style="edgeStyle=orthogonalEdgeStyle;" target="416">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e416yes" edge="1" parent="40" source="416" style="edgeStyle=orthogonalEdgeStyle;" target="417" value="YES">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e416no" edge="1" parent="40" source="416" style="edgeStyle=orthogonalEdgeStyle;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="418" value="NO">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="17.5" y="1650" />
+              <mxPoint x="17.5" y="1790" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e417" edge="1" parent="40" source="417" style="edgeStyle=orthogonalEdgeStyle;" target="418">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="x1" edge="1" parent="1" source="111" style="edgeStyle=orthogonalEdgeStyle;dashed=0;strokeColor=#82b366;" target="201" value="→ InitSimulation()">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="x2" edge="1" parent="1" source="210" style="edgeStyle=orthogonalEdgeStyle;dashed=1;strokeColor=#d6b656;" target="301" value="→ enter render loop">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="1370" />
+              <mxPoint x="720" y="75" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="x3" edge="1" parent="1" source="305" style="edgeStyle=orthogonalEdgeStyle;dashed=1;strokeColor=#6c8ebf;" target="102" value="→ MAIN_SCREEN">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="20" y="370" />
+              <mxPoint x="20" y="130" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="x4" edge="1" parent="1" source="307" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#b85450;" target="401" value="TickSimulation(dt)">
+          <mxGeometry relative="1" x="-0.3" y="-15" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="1140" y="545" />
+              <mxPoint x="1140" y="525" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="x5" edge="1" parent="1" source="321" style="edgeStyle=orthogonalEdgeStyle;dashed=1;strokeColor=#82b366;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="201" value="Start / Restart">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="x6" edge="1" parent="1" source="418" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#d6b656;" target="308" value="→ continue render">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1335" y="1870" />
+              <mxPoint x="750" y="1870" />
+              <mxPoint x="750" y="628" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
