@@ -1,9 +1,14 @@
 #include "vehicle_control_ui.hpp"
 #include "map/map_data.hpp"
+#include "path_tracking/pure_pursuit/pure_pursuit.hpp"
+#include "path_tracking/pure_pursuit/pure_pursuit_loader.hpp"
+#include "path_tracking/adaptive_pure_pursuit/adaptive_pure_pursuit.hpp"
+#include "path_tracking/adaptive_pure_pursuit/adaptive_pure_pursuit_loader.hpp"
 #include <filesystem>
 
 const std::vector<std::string> VehicleControlUI::kAvailableAlgorithms = {
     "Pure Pursuit",
+    "Adaptive Pure Pursuit",
 };
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -324,11 +329,6 @@ void VehicleControlUI::InitSimulation() {
     const MapData&  map  = map_loader_.GetMap();
     const PathData& path = map_loader_.GetPath();
 
-    // Load pure pursuit config from JSON; wheelbase always comes from vehicle
-    auto fcfg = path_tracking::LoadPurePursuitConfig(
-                    std::string(CONFIG_PATH) + "/path_tracking/pure_pursuit.json");
-    simMaxSpeed_ = fcfg.max_speed_mps;
-
     // simScale_: map_units = real_meters * simScale_
     float real_half_w  = vd.wheel_tread * 0.5f + std::max(vd.left_overhang, vd.right_overhang);
     simScale_     = map.vehicle_radius / real_half_w;
@@ -364,11 +364,27 @@ void VehicleControlUI::InitSimulation() {
 
     simModel_ = std::make_unique<vehicle::KinematicBicycleModel>(vd);
 
-    path_tracking::PurePursuitConfig cfg;
-    cfg.lookahead_distance = fcfg.lookahead_distance;
-    cfg.lookahead_gain     = fcfg.lookahead_gain;
-    cfg.wheelbase          = vd.wheelbase; // always from vehicle data
-    simPursuit_ = std::make_unique<path_tracking::PurePursuit>(cfg);
+    if (selectedAlgorithm_ == "Adaptive Pure Pursuit") {
+        auto fcfg = path_tracking::LoadAdaptivePurePursuitConfig(
+                        std::string(CONFIG_PATH) + "/path_tracking/adaptive_pure_pursuit.json");
+        simMaxSpeed_ = fcfg.max_speed_mps;
+        path_tracking::AdaptivePurePursuitConfig cfg;
+        cfg.min_lookahead  = fcfg.min_lookahead;
+        cfg.max_lookahead  = fcfg.max_lookahead;
+        cfg.speed_gain     = fcfg.speed_gain;
+        cfg.curvature_gain = fcfg.curvature_gain;
+        cfg.wheelbase      = vd.wheelbase;
+        simPursuit_ = std::make_unique<path_tracking::AdaptivePurePursuit>(cfg);
+    } else {
+        auto fcfg = path_tracking::LoadPurePursuitConfig(
+                        std::string(CONFIG_PATH) + "/path_tracking/pure_pursuit.json");
+        simMaxSpeed_ = fcfg.max_speed_mps;
+        path_tracking::PurePursuitConfig cfg;
+        cfg.lookahead_distance = fcfg.lookahead_distance;
+        cfg.lookahead_gain     = fcfg.lookahead_gain;
+        cfg.wheelbase          = vd.wheelbase;
+        simPursuit_ = std::make_unique<path_tracking::PurePursuit>(cfg);
+    }
     simPursuit_->SetPath(simScaledPath_);
 }
 

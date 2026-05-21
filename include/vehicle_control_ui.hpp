@@ -20,8 +20,7 @@
 #include "vehicle/vehicle_loader.hpp"
 #include "vehicle/vehicle_bicycle_model.hpp"
 #include "vehicle/vehicle_state.hpp"
-#include "path_tracking/pure_pursuit/pure_pursuit.hpp"
-#include "path_tracking/pure_pursuit/pure_pursuit_loader.hpp"
+#include "path_tracking/path_tracking_algorithm.hpp"
 
 class VehicleControlUI {
 public:
@@ -69,7 +68,7 @@ private:
 
     vehicle::VehicleState                            simVehicleState_;
     std::unique_ptr<vehicle::KinematicBicycleModel>  simModel_;
-    std::unique_ptr<path_tracking::PurePursuit>      simPursuit_;
+    std::unique_ptr<path_tracking::IPathTrackingAlgorithm> simPursuit_;
     std::vector<Point2D>                             simScaledPath_;  // in real meters
     std::vector<float>                               simTraceX_, simTraceY_;  // map units
     double lastSimTime_;

@@ -1,6 +1,5 @@
 #pragma once
-#include "map/map_data.hpp"
-#include "vehicle/vehicle_state.hpp"
+#include "path_tracking/path_tracking_algorithm.hpp"
 #include <vector>
 
 namespace path_tracking {
@@ -11,17 +10,15 @@ struct PurePursuitConfig {
     float wheelbase          = 0.5f;
 };
 
-class PurePursuit {
+class PurePursuit : public IPathTrackingAlgorithm {
 public:
     explicit PurePursuit(const PurePursuitConfig& config = {});
 
-    void  SetPath(const std::vector<Point2D>& waypoints);
+    void    SetPath(const std::vector<Point2D>& waypoints) override;
+    float   ComputeSteering(const vehicle::VehicleState& state) const override;
+    Point2D GetLookaheadPoint() const override { return last_lookahead_; }
 
-    // Returns front-wheel steering angle δ [rad] given current vehicle state.
-    float ComputeSteering(const vehicle::VehicleState& state) const;
-
-    const PurePursuitConfig& GetConfig()       const { return config_; }
-    Point2D                  GetLookaheadPoint() const { return last_lookahead_; }
+    const PurePursuitConfig& GetConfig() const { return config_; }
 
 private:
     PurePursuitConfig    config_;
