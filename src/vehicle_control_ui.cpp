@@ -4,11 +4,14 @@
 #include "path_tracking/pure_pursuit/pure_pursuit_loader.hpp"
 #include "path_tracking/adaptive_pure_pursuit/adaptive_pure_pursuit.hpp"
 #include "path_tracking/adaptive_pure_pursuit/adaptive_pure_pursuit_loader.hpp"
+#include "path_tracking/lqr/lqr.hpp"
+#include "path_tracking/lqr/lqr_loader.hpp"
 #include <filesystem>
 
 const std::vector<std::string> VehicleControlUI::kAvailableAlgorithms = {
     "Pure Pursuit",
     "Adaptive Pure Pursuit",
+    "LQR",
 };
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -375,6 +378,25 @@ void VehicleControlUI::InitSimulation() {
         cfg.curvature_gain = fcfg.curvature_gain;
         cfg.wheelbase      = vd.wheelbase;
         simPursuit_ = std::make_unique<path_tracking::AdaptivePurePursuit>(cfg);
+    } else if (selectedAlgorithm_ == "LQR") {
+        auto fcfg = path_tracking::LoadLqrConfig(
+                        std::string(CONFIG_PATH) + "/path_tracking/lqr.json");
+        simMaxSpeed_ = fcfg.max_speed;
+        path_tracking::LqrConfig cfg;
+        cfg.q0             = fcfg.q0;
+        cfg.q1             = fcfg.q1;
+        cfg.q2             = fcfg.q2;
+        cfg.q3             = fcfg.q3;
+        cfg.q4             = fcfg.q4;
+        cfg.r_steering     = fcfg.r_steering;
+        cfg.r_acceleration = fcfg.r_acceleration;
+        cfg.r_scale        = fcfg.r_scale;
+        cfg.time_step      = fcfg.time_step;
+        cfg.max_speed      = fcfg.max_speed;
+        cfg.dare_iterations = fcfg.dare_iterations;
+        cfg.dare_threshold  = fcfg.dare_threshold;
+        cfg.wheelbase      = vd.wheelbase;
+        simPursuit_ = std::make_unique<path_tracking::Lqr>(cfg);
     } else {
         auto fcfg = path_tracking::LoadPurePursuitConfig(
                         std::string(CONFIG_PATH) + "/path_tracking/pure_pursuit.json");

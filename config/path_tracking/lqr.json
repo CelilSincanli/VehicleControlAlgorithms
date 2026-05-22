@@ -1,0 +1,14 @@
+{
+  "q0": 1.0,
+  "q1": 1.0,
+  "q2": 1.0,
+  "q3": 1.0,
+  "q4": 1.0,
+  "r_steering": 1.0,
+  "r_acceleration": 1.0,
+  "r_scale": 4.0,
+  "time_step": 0.016,
+  "max_speed": 3.0,
+  "dare_iterations": 150,
+  "dare_threshold": 0.01
+}

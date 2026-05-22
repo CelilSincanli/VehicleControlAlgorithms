@@ -20,6 +20,8 @@ add_executable(${PROJECT_NAME}
     src/path_tracking/pure_pursuit/pure_pursuit_loader.cpp
     src/path_tracking/adaptive_pure_pursuit/adaptive_pure_pursuit.cpp
     src/path_tracking/adaptive_pure_pursuit/adaptive_pure_pursuit_loader.cpp
+    src/path_tracking/lqr/lqr.cpp
+    src/path_tracking/lqr/lqr_loader.cpp
     include/third_parties/imgui/imgui.cpp
     include/third_parties/imgui/imgui_draw.cpp
     include/third_parties/imgui/imgui_tables.cpp
