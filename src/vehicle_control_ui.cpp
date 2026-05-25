@@ -6,12 +6,15 @@
 #include "path_tracking/adaptive_pure_pursuit/adaptive_pure_pursuit_loader.hpp"
 #include "path_tracking/lqr/lqr.hpp"
 #include "path_tracking/lqr/lqr_loader.hpp"
+#include "path_tracking/stanley/stanley.hpp"
+#include "path_tracking/stanley/stanley_loader.hpp"
 #include <filesystem>
 
 const std::vector<std::string> VehicleControlUI::kAvailableAlgorithms = {
     "Pure Pursuit",
     "Adaptive Pure Pursuit",
     "LQR",
+    "Stanley",
 };
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -397,6 +400,16 @@ void VehicleControlUI::InitSimulation() {
         cfg.dare_threshold  = fcfg.dare_threshold;
         cfg.wheelbase      = vd.wheelbase;
         simPursuit_ = std::make_unique<path_tracking::Lqr>(cfg);
+    } else if (selectedAlgorithm_ == "Stanley") {
+        auto fcfg = path_tracking::LoadStanleyConfig(
+                        std::string(CONFIG_PATH) + "/path_tracking/stanley.json");
+        simMaxSpeed_ = fcfg.max_speed_mps;
+        path_tracking::StanleyConfig cfg;
+        cfg.stanley_gain = fcfg.stanley_gain;
+        cfg.min_speed    = fcfg.min_speed;
+        cfg.max_speed    = fcfg.max_speed_mps;
+        cfg.wheelbase    = vd.wheelbase;
+        simPursuit_ = std::make_unique<path_tracking::Stanley>(cfg);
     } else {
         auto fcfg = path_tracking::LoadPurePursuitConfig(
                         std::string(CONFIG_PATH) + "/path_tracking/pure_pursuit.json");
