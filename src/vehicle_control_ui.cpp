@@ -674,14 +674,18 @@ void VehicleControlUI::RenderSimulationScreen() {
         float buttonHeight = textSize.y * 2.0f;
         float buttonX      = (frameWidth3 - buttonWidth) * 0.5f;
 
-        // Start / Stop / Restart button near top
+        // Start / Stop / Resume / Restart button near top
         const char* simBtnLabel = (simRunState_ == SIM_RUNNING) ? "Stop"
+                                : (simRunState_ == SIM_PAUSED)  ? "Resume"
                                 : (simRunState_ == SIM_DONE)    ? "Restart"
                                 :                                 "Start Simulation";
         ImGui::SetCursorPos(ImVec2(buttonX, 20.0f));
         if (ImGui::Button(simBtnLabel, ImVec2(buttonWidth, buttonHeight))) {
             if (simRunState_ == SIM_RUNNING) {
-                simRunState_ = SIM_IDLE;
+                simRunState_ = SIM_PAUSED;
+            } else if (simRunState_ == SIM_PAUSED) {
+                lastSimTime_ = glfwGetTime();
+                simRunState_ = SIM_RUNNING;
             } else {
                 InitSimulation();
                 simRunState_ = SIM_RUNNING;

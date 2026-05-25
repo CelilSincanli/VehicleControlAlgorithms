@@ -63,7 +63,7 @@ private:
     enum Screen { MAIN_SCREEN, SIMULATION_SCREEN };
     Screen currentScreen;
 
-    enum SimState { SIM_IDLE, SIM_RUNNING, SIM_DONE };
+    enum SimState { SIM_IDLE, SIM_RUNNING, SIM_PAUSED, SIM_DONE };
     SimState simRunState_;
 
     vehicle::VehicleState                            simVehicleState_;
