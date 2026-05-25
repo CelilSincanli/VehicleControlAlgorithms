@@ -601,7 +601,7 @@ void VehicleControlUI::RenderSimulationScreen() {
             if (map.loaded) {
                 float sx = map.start.x, sy = map.start.y;
                 float gx = map.goal.x,  gy = map.goal.y;
-                ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle, 10.0f, ImVec4(0.2f, 0.9f, 0.2f, 1.0f));
+                ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle, 10.0f, ImVec4(0.0f, 1.0f, 0.2f, 1.0f));
                 ImPlot::PlotScatter("Start", &sx, &sy, 1);
                 ImPlot::SetNextMarkerStyle(ImPlotMarker_Square, 10.0f, ImVec4(0.9f, 0.3f, 0.2f, 1.0f));
                 ImPlot::PlotScatter("Goal", &gx, &gy, 1);
@@ -609,7 +609,7 @@ void VehicleControlUI::RenderSimulationScreen() {
 
             if (simRunState_ != SIM_IDLE && !simTraceX_.empty()) {
                 ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle, 4.0f,
-                    ImVec4(0.3f, 0.55f, 1.0f, 0.75f), 0.0f,
+                    ImVec4(0.15f, 0.35f, 1.0f, 1.0f), 0.0f,
                     ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
                 ImPlot::PlotScatter("Trace", simTraceX_.data(), simTraceY_.data(),
                                     (int)simTraceX_.size());

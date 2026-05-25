@@ -14,7 +14,6 @@ void Stanley::SetPath(const std::vector<Point2D>& waypoints) {
     target_point_     = path_.empty() ? Point2D{} : path_.front();
 }
 
-// Central-difference tangent angle at waypoint index.
 float Stanley::ComputePathYaw(int index) const {
     const int n = static_cast<int>(path_.size());
     int prev = std::max(index - 1, 0);
@@ -23,8 +22,6 @@ float Stanley::ComputePathYaw(int index) const {
                       path_[next].x - path_[prev].x);
 }
 
-// Forward-only search in a fixed window; returns index of the waypoint
-// closest (in 2-D) to the front-axle position (fx, fy).
 int Stanley::FindNearestWaypoint(float fx, float fy) const {
     const int n      = static_cast<int>(path_.size());
     const int end    = std::min(current_path_idx_ + kSearchWindow, n);
@@ -43,7 +40,6 @@ int Stanley::FindNearestWaypoint(float fx, float fy) const {
 float Stanley::ComputeSteering(const vehicle::VehicleState& state) const {
     if (path_.empty()) return 0.0f;
 
-    // Front-axle position.
     float fx = state.x + config_.wheelbase * std::cos(state.heading);
     float fy = state.y + config_.wheelbase * std::sin(state.heading);
 
@@ -53,13 +49,10 @@ float Stanley::ComputeSteering(const vehicle::VehicleState& state) const {
 
     float path_yaw = ComputePathYaw(nearest);
 
-    // Heading error, normalised to [-π, π].
     float heading_error = state.heading - path_yaw;
     while (heading_error >  M_PI) heading_error -= 2.0f * static_cast<float>(M_PI);
     while (heading_error < -M_PI) heading_error += 2.0f * static_cast<float>(M_PI);
 
-    // Signed cross-track error: distance from front axle to path, measured
-    // perpendicular to the path direction (positive = front axle left of path).
     float wp_x = path_[nearest].x;
     float wp_y = path_[nearest].y;
     float e_lat = -std::sin(path_yaw) * (fx - wp_x)

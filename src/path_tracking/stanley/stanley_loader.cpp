@@ -1,22 +1,9 @@
 #include "path_tracking/stanley/stanley_loader.hpp"
+#include "path_tracking/config_reader.hpp"
 #include <fstream>
-#include <sstream>
 #include <string>
-#include <stdexcept>
 
 namespace path_tracking {
-
-static bool readFloat(const std::string& src, const std::string& key, float& out) {
-    std::string search = "\"" + key + "\"";
-    auto pos = src.find(search);
-    if (pos == std::string::npos) return false;
-    pos = src.find(':', pos + search.size());
-    if (pos == std::string::npos) return false;
-    ++pos;
-    while (pos < src.size() && (src[pos] == ' ' || src[pos] == '\t' || src[pos] == '\n')) ++pos;
-    try { out = std::stof(src.substr(pos)); return true; }
-    catch (...) { return false; }
-}
 
 StanleyFileConfig LoadStanleyConfig(const std::string& path) {
     StanleyFileConfig cfg;

@@ -61,7 +61,6 @@ Point2D AdaptivePurePursuit::FindLookaheadPoint(const vehicle::VehicleState& sta
 }
 
 float AdaptivePurePursuit::ComputeCurvature(int idx) const {
-    // Menger curvature from three consecutive waypoints
     int i = std::max(0, idx - 1);
     int j = idx;
     int k = std::min((int)path_.size() - 1, idx + 1);
