@@ -1,0 +1,11 @@
+{
+    "horizon_N": 15,
+    "iterations": 10,
+    "learning_rate": 0.08,
+    "fd_step": 0.01,
+    "rollout_dt": 0.1,
+    "max_speed": 5.0,
+    "w_lat": 1.0,
+    "w_heading": 0.5,
+    "w_control": 0.05
+}

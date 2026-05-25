@@ -8,6 +8,10 @@
 #include "path_tracking/lqr/lqr_loader.hpp"
 #include "path_tracking/stanley/stanley.hpp"
 #include "path_tracking/stanley/stanley_loader.hpp"
+#include "path_tracking/mppi/mppi.hpp"
+#include "path_tracking/mppi/mppi_loader.hpp"
+#include "path_tracking/mpc/mpc.hpp"
+#include "path_tracking/mpc/mpc_loader.hpp"
 #include <filesystem>
 
 const std::vector<std::string> VehicleControlUI::kAvailableAlgorithms = {
@@ -15,6 +19,8 @@ const std::vector<std::string> VehicleControlUI::kAvailableAlgorithms = {
     "Adaptive Pure Pursuit",
     "LQR",
     "Stanley",
+    "MPPI",
+    "MPC",
 };
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -410,6 +416,37 @@ void VehicleControlUI::InitSimulation() {
         cfg.max_speed    = fcfg.max_speed_mps;
         cfg.wheelbase    = vd.wheelbase;
         simPursuit_ = std::make_unique<path_tracking::Stanley>(cfg);
+    } else if (selectedAlgorithm_ == "MPPI") {
+        auto fcfg = path_tracking::LoadMppiConfig(
+                        std::string(CONFIG_PATH) + "/path_tracking/mppi.json");
+        simMaxSpeed_ = fcfg.max_speed_mps;
+        path_tracking::MppiConfig cfg;
+        cfg.horizon_T     = fcfg.horizon_T;
+        cfg.num_samples_K = fcfg.num_samples_K;
+        cfg.lambda        = fcfg.lambda;
+        cfg.sigma_steer   = fcfg.sigma_steer;
+        cfg.rollout_dt    = fcfg.rollout_dt;
+        cfg.max_speed     = fcfg.max_speed_mps;
+        cfg.w_lat         = fcfg.w_lat;
+        cfg.w_heading     = fcfg.w_heading;
+        cfg.wheelbase     = vd.wheelbase;
+        simPursuit_ = std::make_unique<path_tracking::Mppi>(cfg);
+    } else if (selectedAlgorithm_ == "MPC") {
+        auto fcfg = path_tracking::LoadMpcConfig(
+                        std::string(CONFIG_PATH) + "/path_tracking/mpc.json");
+        simMaxSpeed_ = fcfg.max_speed_mps;
+        path_tracking::MpcConfig cfg;
+        cfg.horizon_N     = fcfg.horizon_N;
+        cfg.iterations    = fcfg.iterations;
+        cfg.learning_rate = fcfg.learning_rate;
+        cfg.fd_step       = fcfg.fd_step;
+        cfg.rollout_dt    = fcfg.rollout_dt;
+        cfg.max_speed     = fcfg.max_speed_mps;
+        cfg.w_lat         = fcfg.w_lat;
+        cfg.w_heading     = fcfg.w_heading;
+        cfg.w_control     = fcfg.w_control;
+        cfg.wheelbase     = vd.wheelbase;
+        simPursuit_ = std::make_unique<path_tracking::Mpc>(cfg);
     } else {
         auto fcfg = path_tracking::LoadPurePursuitConfig(
                         std::string(CONFIG_PATH) + "/path_tracking/pure_pursuit.json");
@@ -601,13 +638,16 @@ void VehicleControlUI::RenderSimulationScreen() {
             if (map.loaded) {
                 float sx = map.start.x, sy = map.start.y;
                 float gx = map.goal.x,  gy = map.goal.y;
+                ImPlot::SetNextLineStyle(ImVec4(0.0f, 1.0f, 0.2f, 1.0f));
                 ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle, 10.0f, ImVec4(0.0f, 1.0f, 0.2f, 1.0f));
                 ImPlot::PlotScatter("Start", &sx, &sy, 1);
+                ImPlot::SetNextLineStyle(ImVec4(0.9f, 0.3f, 0.2f, 1.0f));
                 ImPlot::SetNextMarkerStyle(ImPlotMarker_Square, 10.0f, ImVec4(0.9f, 0.3f, 0.2f, 1.0f));
                 ImPlot::PlotScatter("Goal", &gx, &gy, 1);
             }
 
             if (simRunState_ != SIM_IDLE && !simTraceX_.empty()) {
+                ImPlot::SetNextLineStyle(ImVec4(0.15f, 0.35f, 1.0f, 1.0f));
                 ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle, 4.0f,
                     ImVec4(0.15f, 0.35f, 1.0f, 1.0f), 0.0f,
                     ImVec4(0.0f, 0.0f, 0.0f, 0.0f));

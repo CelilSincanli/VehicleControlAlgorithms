@@ -24,6 +24,10 @@ add_executable(${PROJECT_NAME}
     src/path_tracking/lqr/lqr_loader.cpp
     src/path_tracking/stanley/stanley.cpp
     src/path_tracking/stanley/stanley_loader.cpp
+    src/path_tracking/mppi/mppi.cpp
+    src/path_tracking/mppi/mppi_loader.cpp
+    src/path_tracking/mpc/mpc.cpp
+    src/path_tracking/mpc/mpc_loader.cpp
     include/third_parties/imgui/imgui.cpp
     include/third_parties/imgui/imgui_draw.cpp
     include/third_parties/imgui/imgui_tables.cpp
