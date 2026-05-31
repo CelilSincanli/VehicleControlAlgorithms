@@ -719,6 +719,8 @@ void VehicleControlUI::RenderSimulationScreen() {
         ImGui::SetCursorPos(ImVec2(10.0f, infoY + 8.0f + rowH * 4));
         ImGui::Text("Speed        : %.1f km/h", simVehicleState_.speed * 3.6f);
         ImGui::SetCursorPos(ImVec2(10.0f, infoY + 8.0f + rowH * 5));
+        ImGui::Text("Steering     : %.1f deg", simLastDelta_ * (180.0f / 3.14159265f));
+        ImGui::SetCursorPos(ImVec2(10.0f, infoY + 8.0f + rowH * 6));
         const char* statusStr = (simRunState_ == SIM_RUNNING) ? "Running"
                               : (simRunState_ == SIM_DONE)    ? "Done"
                               :                                 "Idle";
