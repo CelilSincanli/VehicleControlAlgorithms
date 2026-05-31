@@ -376,102 +376,182 @@ void VehicleControlUI::InitSimulation() {
 
     simModel_ = std::make_unique<vehicle::KinematicBicycleModel>(vd);
 
+    // Load JSON defaults into tuning structs (only when override is not enabled)
     if (selectedAlgorithm_ == "Adaptive Pure Pursuit") {
-        auto fcfg = path_tracking::LoadAdaptivePurePursuitConfig(
-                        std::string(CONFIG_PATH) + "/path_tracking/adaptive_pure_pursuit.json");
-        simMaxSpeed_ = fcfg.max_speed_mps;
+        if (!tuneAPP_.enabled) {
+            auto fcfg = path_tracking::LoadAdaptivePurePursuitConfig(
+                            std::string(CONFIG_PATH) + "/path_tracking/adaptive_pure_pursuit.json");
+            tuneAPP_.min_lookahead  = fcfg.min_lookahead;
+            tuneAPP_.max_lookahead  = fcfg.max_lookahead;
+            tuneAPP_.speed_gain     = fcfg.speed_gain;
+            tuneAPP_.curvature_gain = fcfg.curvature_gain;
+            tuneAPP_.max_speed      = fcfg.max_speed_mps;
+            tuneAPP_.search_window  = fcfg.search_window;
+        }
+    } else if (selectedAlgorithm_ == "LQR") {
+        if (!tuneLQR_.enabled) {
+            auto fcfg = path_tracking::LoadLqrConfig(
+                            std::string(CONFIG_PATH) + "/path_tracking/lqr.json");
+            tuneLQR_.q0             = fcfg.q0;
+            tuneLQR_.q1             = fcfg.q1;
+            tuneLQR_.q2             = fcfg.q2;
+            tuneLQR_.q3             = fcfg.q3;
+            tuneLQR_.q4             = fcfg.q4;
+            tuneLQR_.r_steering     = fcfg.r_steering;
+            tuneLQR_.r_acceleration = fcfg.r_acceleration;
+            tuneLQR_.r_scale        = fcfg.r_scale;
+            tuneLQR_.time_step      = fcfg.time_step;
+            tuneLQR_.max_speed      = fcfg.max_speed;
+            tuneLQR_.dare_iterations = fcfg.dare_iterations;
+            tuneLQR_.dare_threshold  = fcfg.dare_threshold;
+            tuneLQR_.search_window   = fcfg.search_window;
+        }
+    } else if (selectedAlgorithm_ == "Stanley") {
+        if (!tuneStanley_.enabled) {
+            auto fcfg = path_tracking::LoadStanleyConfig(
+                            std::string(CONFIG_PATH) + "/path_tracking/stanley.json");
+            tuneStanley_.stanley_gain  = fcfg.stanley_gain;
+            tuneStanley_.min_speed     = fcfg.min_speed;
+            tuneStanley_.max_speed     = fcfg.max_speed_mps;
+            tuneStanley_.max_delta     = fcfg.max_delta;
+            tuneStanley_.search_window = fcfg.search_window;
+        }
+    } else if (selectedAlgorithm_ == "MPPI") {
+        if (!tuneMPPI_.enabled) {
+            auto fcfg = path_tracking::LoadMppiConfig(
+                            std::string(CONFIG_PATH) + "/path_tracking/mppi.json");
+            tuneMPPI_.horizon_T     = fcfg.horizon_T;
+            tuneMPPI_.num_samples_K = fcfg.num_samples_K;
+            tuneMPPI_.lambda        = fcfg.lambda;
+            tuneMPPI_.sigma_steer   = fcfg.sigma_steer;
+            tuneMPPI_.rollout_dt    = fcfg.rollout_dt;
+            tuneMPPI_.max_speed     = fcfg.max_speed_mps;
+            tuneMPPI_.w_lat         = fcfg.w_lat;
+            tuneMPPI_.w_heading     = fcfg.w_heading;
+            tuneMPPI_.search_window = fcfg.search_window;
+            tuneMPPI_.max_delta     = fcfg.max_delta;
+            tuneMPPI_.rng_seed      = fcfg.rng_seed;
+        }
+    } else if (selectedAlgorithm_ == "MPC") {
+        if (!tuneMPC_.enabled) {
+            auto fcfg = path_tracking::LoadMpcConfig(
+                            std::string(CONFIG_PATH) + "/path_tracking/mpc.json");
+            tuneMPC_.horizon_N     = fcfg.horizon_N;
+            tuneMPC_.iterations    = fcfg.iterations;
+            tuneMPC_.learning_rate = fcfg.learning_rate;
+            tuneMPC_.fd_step       = fcfg.fd_step;
+            tuneMPC_.rollout_dt    = fcfg.rollout_dt;
+            tuneMPC_.max_speed     = fcfg.max_speed_mps;
+            tuneMPC_.w_lat         = fcfg.w_lat;
+            tuneMPC_.w_heading     = fcfg.w_heading;
+            tuneMPC_.w_control     = fcfg.w_control;
+            tuneMPC_.search_window = fcfg.search_window;
+            tuneMPC_.max_delta     = fcfg.max_delta;
+        }
+    } else {
+        if (!tunePP_.enabled) {
+            auto fcfg = path_tracking::LoadPurePursuitConfig(
+                            std::string(CONFIG_PATH) + "/path_tracking/pure_pursuit.json");
+            tunePP_.lookahead_distance = fcfg.lookahead_distance;
+            tunePP_.lookahead_gain     = fcfg.lookahead_gain;
+            tunePP_.max_speed          = fcfg.max_speed_mps;
+            tunePP_.search_window      = fcfg.search_window;
+        }
+    }
+
+    RebuildAlgorithm();
+}
+
+void VehicleControlUI::RebuildAlgorithm() {
+    const VehicleData& vd = vehicle_loader_.GetVehicle();
+
+    if (selectedAlgorithm_ == "Adaptive Pure Pursuit") {
+        simMaxSpeed_ = tuneAPP_.max_speed;
         path_tracking::AdaptivePurePursuitConfig cfg;
-        cfg.min_lookahead  = fcfg.min_lookahead;
-        cfg.max_lookahead  = fcfg.max_lookahead;
-        cfg.speed_gain     = fcfg.speed_gain;
-        cfg.curvature_gain = fcfg.curvature_gain;
+        cfg.min_lookahead  = tuneAPP_.min_lookahead;
+        cfg.max_lookahead  = tuneAPP_.max_lookahead;
+        cfg.speed_gain     = tuneAPP_.speed_gain;
+        cfg.curvature_gain = tuneAPP_.curvature_gain;
         cfg.wheelbase      = vd.wheelbase;
-        cfg.search_window  = fcfg.search_window;
+        cfg.search_window  = tuneAPP_.search_window;
         simPursuit_ = std::make_unique<path_tracking::AdaptivePurePursuit>(cfg);
     } else if (selectedAlgorithm_ == "LQR") {
-        auto fcfg = path_tracking::LoadLqrConfig(
-                        std::string(CONFIG_PATH) + "/path_tracking/lqr.json");
-        simMaxSpeed_ = fcfg.max_speed;
+        simMaxSpeed_ = tuneLQR_.max_speed;
         path_tracking::LqrConfig cfg;
-        cfg.q0             = fcfg.q0;
-        cfg.q1             = fcfg.q1;
-        cfg.q2             = fcfg.q2;
-        cfg.q3             = fcfg.q3;
-        cfg.q4             = fcfg.q4;
-        cfg.r_steering     = fcfg.r_steering;
-        cfg.r_acceleration = fcfg.r_acceleration;
-        cfg.r_scale        = fcfg.r_scale;
-        cfg.time_step      = fcfg.time_step;
-        cfg.max_speed      = fcfg.max_speed;
-        cfg.dare_iterations = fcfg.dare_iterations;
-        cfg.dare_threshold  = fcfg.dare_threshold;
+        cfg.q0              = tuneLQR_.q0;
+        cfg.q1              = tuneLQR_.q1;
+        cfg.q2              = tuneLQR_.q2;
+        cfg.q3              = tuneLQR_.q3;
+        cfg.q4              = tuneLQR_.q4;
+        cfg.r_steering      = tuneLQR_.r_steering;
+        cfg.r_acceleration  = tuneLQR_.r_acceleration;
+        cfg.r_scale         = tuneLQR_.r_scale;
+        cfg.time_step       = tuneLQR_.time_step;
+        cfg.max_speed       = tuneLQR_.max_speed;
+        cfg.dare_iterations = tuneLQR_.dare_iterations;
+        cfg.dare_threshold  = tuneLQR_.dare_threshold;
         cfg.wheelbase       = vd.wheelbase;
-        cfg.search_window   = fcfg.search_window;
+        cfg.search_window   = tuneLQR_.search_window;
         simPursuit_ = std::make_unique<path_tracking::Lqr>(cfg);
     } else if (selectedAlgorithm_ == "Stanley") {
-        auto fcfg = path_tracking::LoadStanleyConfig(
-                        std::string(CONFIG_PATH) + "/path_tracking/stanley.json");
-        simMaxSpeed_ = fcfg.max_speed_mps;
+        simMaxSpeed_ = tuneStanley_.max_speed;
         path_tracking::StanleyConfig cfg;
-        cfg.stanley_gain  = fcfg.stanley_gain;
-        cfg.min_speed     = fcfg.min_speed;
-        cfg.max_speed     = fcfg.max_speed_mps;
-        cfg.max_delta     = fcfg.max_delta;
+        cfg.stanley_gain  = tuneStanley_.stanley_gain;
+        cfg.min_speed     = tuneStanley_.min_speed;
+        cfg.max_speed     = tuneStanley_.max_speed;
+        cfg.max_delta     = tuneStanley_.max_delta;
         cfg.wheelbase     = vd.wheelbase;
-        cfg.search_window = fcfg.search_window;
+        cfg.search_window = tuneStanley_.search_window;
         simPursuit_ = std::make_unique<path_tracking::Stanley>(cfg);
     } else if (selectedAlgorithm_ == "MPPI") {
-        auto fcfg = path_tracking::LoadMppiConfig(
-                        std::string(CONFIG_PATH) + "/path_tracking/mppi.json");
-        simMaxSpeed_ = fcfg.max_speed_mps;
+        simMaxSpeed_ = tuneMPPI_.max_speed;
         path_tracking::MppiConfig cfg;
-        cfg.horizon_T     = fcfg.horizon_T;
-        cfg.num_samples_K = fcfg.num_samples_K;
-        cfg.lambda        = fcfg.lambda;
-        cfg.sigma_steer   = fcfg.sigma_steer;
-        cfg.rollout_dt    = fcfg.rollout_dt;
-        cfg.max_speed     = fcfg.max_speed_mps;
-        cfg.w_lat         = fcfg.w_lat;
-        cfg.w_heading     = fcfg.w_heading;
+        cfg.horizon_T     = tuneMPPI_.horizon_T;
+        cfg.num_samples_K = tuneMPPI_.num_samples_K;
+        cfg.lambda        = tuneMPPI_.lambda;
+        cfg.sigma_steer   = tuneMPPI_.sigma_steer;
+        cfg.rollout_dt    = tuneMPPI_.rollout_dt;
+        cfg.max_speed     = tuneMPPI_.max_speed;
+        cfg.w_lat         = tuneMPPI_.w_lat;
+        cfg.w_heading     = tuneMPPI_.w_heading;
         cfg.wheelbase     = vd.wheelbase;
-        cfg.search_window = fcfg.search_window;
-        cfg.max_delta     = fcfg.max_delta;
-        cfg.rng_seed      = fcfg.rng_seed;
+        cfg.search_window = tuneMPPI_.search_window;
+        cfg.max_delta     = tuneMPPI_.max_delta;
+        cfg.rng_seed      = tuneMPPI_.rng_seed;
         simPursuit_ = std::make_unique<path_tracking::Mppi>(cfg);
     } else if (selectedAlgorithm_ == "MPC") {
-        auto fcfg = path_tracking::LoadMpcConfig(
-                        std::string(CONFIG_PATH) + "/path_tracking/mpc.json");
-        simMaxSpeed_ = fcfg.max_speed_mps;
+        simMaxSpeed_ = tuneMPC_.max_speed;
         path_tracking::MpcConfig cfg;
-        cfg.horizon_N     = fcfg.horizon_N;
-        cfg.iterations    = fcfg.iterations;
-        cfg.learning_rate = fcfg.learning_rate;
-        cfg.fd_step       = fcfg.fd_step;
-        cfg.rollout_dt    = fcfg.rollout_dt;
-        cfg.max_speed     = fcfg.max_speed_mps;
-        cfg.w_lat         = fcfg.w_lat;
-        cfg.w_heading     = fcfg.w_heading;
-        cfg.w_control     = fcfg.w_control;
+        cfg.horizon_N     = tuneMPC_.horizon_N;
+        cfg.iterations    = tuneMPC_.iterations;
+        cfg.learning_rate = tuneMPC_.learning_rate;
+        cfg.fd_step       = tuneMPC_.fd_step;
+        cfg.rollout_dt    = tuneMPC_.rollout_dt;
+        cfg.max_speed     = tuneMPC_.max_speed;
+        cfg.w_lat         = tuneMPC_.w_lat;
+        cfg.w_heading     = tuneMPC_.w_heading;
+        cfg.w_control     = tuneMPC_.w_control;
         cfg.wheelbase     = vd.wheelbase;
-        cfg.search_window = fcfg.search_window;
-        cfg.max_delta     = fcfg.max_delta;
+        cfg.search_window = tuneMPC_.search_window;
+        cfg.max_delta     = tuneMPC_.max_delta;
         simPursuit_ = std::make_unique<path_tracking::Mpc>(cfg);
     } else {
-        auto fcfg = path_tracking::LoadPurePursuitConfig(
-                        std::string(CONFIG_PATH) + "/path_tracking/pure_pursuit.json");
-        simMaxSpeed_ = fcfg.max_speed_mps;
+        simMaxSpeed_ = tunePP_.max_speed;
         path_tracking::PurePursuitConfig cfg;
-        cfg.lookahead_distance = fcfg.lookahead_distance;
-        cfg.lookahead_gain     = fcfg.lookahead_gain;
+        cfg.lookahead_distance = tunePP_.lookahead_distance;
+        cfg.lookahead_gain     = tunePP_.lookahead_gain;
         cfg.wheelbase          = vd.wheelbase;
-        cfg.search_window      = fcfg.search_window;
+        cfg.search_window      = tunePP_.search_window;
         simPursuit_ = std::make_unique<path_tracking::PurePursuit>(cfg);
     }
     simPursuit_->SetPath(simScaledPath_);
+    paramsDirty_ = false;
 }
 
 void VehicleControlUI::TickSimulation(float dt) {
     if (simRunState_ != SIM_RUNNING || !simModel_ || !simPursuit_) return;
+
+    if (paramsDirty_) RebuildAlgorithm();
 
     // Goal in real meters
     const MapData& map = map_loader_.GetMap();
@@ -571,6 +651,200 @@ void VehicleControlUI::DrawVehicle(ImDrawList* dl) {
     dl->AddLine        (raPx, lhPx, IM_COL32(100, 180, 255, 160), 1.5f);
     dl->AddCircleFilled(lhPx, 6.0f, IM_COL32(255, 220, 50, 220));
     dl->AddCircle      (lhPx, 6.0f, IM_COL32(255, 255, 255, 180), 12, 1.5f);
+}
+
+void VehicleControlUI::RenderParamTuning(float availableHeight) {
+    // Resolve active tuning enabled flag
+    bool* enabled = nullptr;
+    if      (selectedAlgorithm_ == "Adaptive Pure Pursuit") enabled = &tuneAPP_.enabled;
+    else if (selectedAlgorithm_ == "LQR")                   enabled = &tuneLQR_.enabled;
+    else if (selectedAlgorithm_ == "Stanley")               enabled = &tuneStanley_.enabled;
+    else if (selectedAlgorithm_ == "MPPI")                  enabled = &tuneMPPI_.enabled;
+    else if (selectedAlgorithm_ == "MPC")                   enabled = &tuneMPC_.enabled;
+    else                                                     enabled = &tunePP_.enabled;
+
+    ImGui::Separator();
+    ImGui::TextColored(ImVec4(0.7f, 0.9f, 1.0f, 1.0f), "Parameter Tuning");
+
+    ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4(0.2f, 0.9f, 0.4f, 1.0f));
+    if (ImGui::Checkbox("Override Defaults", enabled)) {
+        if (*enabled) paramsDirty_ = true;
+    }
+    ImGui::PopStyleColor();
+
+    // Slider count for active algorithm
+    int N = 4;
+    if      (selectedAlgorithm_ == "Adaptive Pure Pursuit") N = 6;
+    else if (selectedAlgorithm_ == "LQR")                   N = 13;
+    else if (selectedAlgorithm_ == "Stanley")               N = 5;
+    else if (selectedAlgorithm_ == "MPC")                   N = 11;
+    else if (selectedAlgorithm_ == "MPPI")                  N = 11;
+
+    float headerH = 1.0f
+                  + ImGui::GetTextLineHeightWithSpacing()
+                  + ImGui::GetFrameHeightWithSpacing()
+                  + ImGui::GetStyle().ItemSpacing.y;
+    float sliderAreaH = availableHeight - headerH;
+
+    float spacing = ImGui::GetStyle().ItemSpacing.y;
+    float perH    = (sliderAreaH - spacing * (N - 1)) / static_cast<float>(N);
+    float minH    = ImGui::GetTextLineHeight() + 4.0f;
+    perH = std::max(perH, minH);
+    float padY = std::max(2.0f, (perH - ImGui::GetTextLineHeight()) * 0.5f);
+
+    if (!*enabled) ImGui::BeginDisabled();
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding,
+                        ImVec2(ImGui::GetStyle().FramePadding.x, padY));
+    ImGui::PushItemWidth(-1.0f);
+
+    // Apply value + snap only on mouse release; track hover for tooltip
+    auto sliderF = [&](const char* label, float* v, float mn, float mx,
+                       float step, const char* fmt, const char* desc) {
+        ImGui::SliderFloat(label, v, mn, mx, fmt);
+        if (ImGui::IsItemDeactivatedAfterEdit()) {
+            *v = std::round(*v / step) * step;
+            *v = std::max(mn, std::min(mx, *v));
+            paramsDirty_ = true;
+        }
+        if (*enabled && ImGui::IsItemHovered()) {
+            tooltipState_.description   = desc;
+            tooltipState_.sliderMin     = ImGui::GetItemRectMin();
+            tooltipState_.sliderMax     = ImGui::GetItemRectMax();
+            tooltipState_.lastHoverTime = glfwGetTime();
+        }
+    };
+    auto sliderI = [&](const char* label, int* v, int mn, int mx,
+                       int step, const char* desc) {
+        ImGui::SliderInt(label, v, mn, mx);
+        if (ImGui::IsItemDeactivatedAfterEdit()) {
+            *v = ((*v - mn + step / 2) / step) * step + mn;
+            *v = std::max(mn, std::min(mx, *v));
+            paramsDirty_ = true;
+        }
+        if (*enabled && ImGui::IsItemHovered()) {
+            tooltipState_.description   = desc;
+            tooltipState_.sliderMin     = ImGui::GetItemRectMin();
+            tooltipState_.sliderMax     = ImGui::GetItemRectMax();
+            tooltipState_.lastHoverTime = glfwGetTime();
+        }
+    };
+
+    if (selectedAlgorithm_ == "Adaptive Pure Pursuit") {
+        sliderF("Min Lookahead",   &tuneAPP_.min_lookahead,  0.1f,  8.0f,  0.1f, "%.1f m",
+            "Floor for lookahead distance. Target point never closer than this.");
+        sliderF("Max Lookahead",   &tuneAPP_.max_lookahead,  8.0f,  20.0f, 0.1f, "%.1f m",
+            "Ceiling for lookahead distance. Target point never farther than this.");
+        sliderF("Speed Gain",      &tuneAPP_.speed_gain,     0.1f,  1.0f,  0.1f, "%.1f",
+            "How strongly current speed scales the lookahead. Higher = farther look at speed.");
+        sliderF("Curvature Gain",  &tuneAPP_.curvature_gain, 0.1f,  5.0f,  0.1f, "%.1f",
+            "Lookahead penalty on path curvature. Higher = shorter look on tight corners.");
+        sliderF("Max Speed",       &tuneAPP_.max_speed,      0.1f,  20.0f, 0.1f, "%.1f m/s",
+            "Target cruise speed the controller accelerates towards.");
+        sliderI("Search Window",   &tuneAPP_.search_window,  20,    80,    1,
+            "Waypoints scanned ahead when searching for the lookahead target point.");
+
+    } else if (selectedAlgorithm_ == "LQR") {
+        sliderF("Q0",              &tuneLQR_.q0,              0.1f,  4.0f,  0.1f,  "%.1f",
+            "Cost weight on lateral (cross-track) position error.");
+        sliderF("Q1",              &tuneLQR_.q1,              0.1f,  4.0f,  0.1f,  "%.1f",
+            "Cost weight on lateral error rate (derivative).");
+        sliderF("Q2",              &tuneLQR_.q2,              0.1f,  4.0f,  0.1f,  "%.1f",
+            "Cost weight on yaw (heading) error. Higher = faster alignment.");
+        sliderF("Q3",              &tuneLQR_.q3,              0.1f,  4.0f,  0.1f,  "%.1f",
+            "Cost weight on yaw rate (derivative of heading).");
+        sliderF("Q4",              &tuneLQR_.q4,              0.1f,  4.0f,  0.1f,  "%.1f",
+            "Cost weight on speed error from target speed.");
+        sliderF("R Steering",      &tuneLQR_.r_steering,      0.1f,  4.0f,  0.1f,  "%.1f",
+            "Penalty on steering control effort. Higher = smoother, less aggressive steering.");
+        sliderF("R Acceleration",  &tuneLQR_.r_acceleration,  0.1f,  4.0f,  0.1f,  "%.1f",
+            "Penalty on acceleration control effort.");
+        sliderF("R Scale",         &tuneLQR_.r_scale,         0.1f,  4.0f,  0.1f,  "%.1f",
+            "Global multiplier applied to both R weights (r_steering and r_acceleration).");
+        sliderF("Time Step",       &tuneLQR_.time_step,       0.01f, 0.05f, 0.01f, "%.2f s",
+            "Discrete time step used inside the LQR linearisation and DARE solver.");
+        sliderF("Max Speed",       &tuneLQR_.max_speed,       0.1f,  20.0f, 0.1f,  "%.1f m/s",
+            "Target cruise speed the controller accelerates towards.");
+        sliderI("DARE Iterations", &tuneLQR_.dare_iterations, 100,   250,   10,
+            "Maximum iterations allowed for the DARE (Riccati equation) solver.");
+        sliderF("DARE Threshold",  &tuneLQR_.dare_threshold,  0.01f, 0.05f, 0.01f, "%.2f",
+            "Convergence tolerance for the DARE solver. Smaller = more precise K matrix.");
+        sliderI("Search Window",   &tuneLQR_.search_window,   20,    80,    1,
+            "Waypoints scanned ahead to find the closest reference path point.");
+
+    } else if (selectedAlgorithm_ == "Stanley") {
+        sliderF("Stanley Gain",    &tuneStanley_.stanley_gain,  0.1f, 1.0f,  0.1f, "%.1f",
+            "Cross-track error gain k. Higher = more aggressive lateral correction.");
+        sliderF("Min Speed",       &tuneStanley_.min_speed,     0.1f, 1.0f,  0.1f, "%.1f m/s",
+            "Speed floor used in the Stanley formula denominator to prevent large outputs at low speed.");
+        sliderF("Max Speed",       &tuneStanley_.max_speed,     5.0f, 20.0f, 1.0f, "%.1f m/s",
+            "Target cruise speed the controller accelerates towards.");
+        sliderF("Max Delta",       &tuneStanley_.max_delta,     0.1f, 2.0f,  0.1f, "%.1f rad",
+            "Hard clamp on the steering output angle in radians.");
+        sliderI("Search Window",   &tuneStanley_.search_window, 20,   80,    1,
+            "Waypoints scanned ahead to find the closest front-axle reference point.");
+
+    } else if (selectedAlgorithm_ == "MPPI") {
+        sliderI("Horizon T",       &tuneMPPI_.horizon_T,      5,    25,    1,
+            "Number of time steps in each rollout trajectory.");
+        sliderI("Num Samples K",   &tuneMPPI_.num_samples_K,  50,   200,   1,
+            "Random trajectories sampled per control step. More = better quality, slower.");
+        sliderF("Lambda",          &tuneMPPI_.lambda,         0.5f, 2.0f,  0.1f, "%.1f",
+            "Temperature parameter. Lower concentrates weight on the best-cost samples.");
+        sliderF("Sigma Steer",     &tuneMPPI_.sigma_steer,    0.1f, 1.0f,  0.1f, "%.1f rad",
+            "Standard deviation of the steering noise added to each sample trajectory.");
+        sliderF("Rollout dt",      &tuneMPPI_.rollout_dt,     0.01f, 0.5f, 0.01f, "%.2f s",
+            "Simulation time step used inside each rollout.");
+        sliderF("Max Speed",       &tuneMPPI_.max_speed,      0.1f, 20.0f, 0.1f, "%.1f m/s",
+            "Target cruise speed the controller accelerates towards.");
+        sliderF("W Lateral",       &tuneMPPI_.w_lat,          0.1f, 2.0f,  0.1f, "%.1f",
+            "Cost weight on lateral (cross-track) error in trajectory evaluation.");
+        sliderF("W Heading",       &tuneMPPI_.w_heading,      0.1f, 2.0f,  0.1f, "%.1f",
+            "Cost weight on heading (yaw) error in trajectory evaluation.");
+        sliderI("Search Window",   &tuneMPPI_.search_window,  20,   80,    1,
+            "Waypoints scanned ahead during rollout cost evaluation.");
+        sliderF("Max Delta",       &tuneMPPI_.max_delta,      0.1f, 2.0f,  0.1f, "%.1f rad",
+            "Hard clamp on the steering output angle in radians.");
+        sliderI("RNG Seed",        &tuneMPPI_.rng_seed,       20,   60,    1,
+            "Random seed for noise generation. Change for different sample patterns.");
+
+    } else if (selectedAlgorithm_ == "MPC") {
+        sliderI("Horizon N",       &tuneMPC_.horizon_N,      5,    25,    1,
+            "Number of prediction steps in the MPC horizon.");
+        sliderI("Iterations",      &tuneMPC_.iterations,     5,    25,    1,
+            "Gradient descent iterations performed per control step.");
+        sliderF("Learning Rate",   &tuneMPC_.learning_rate,  0.01f, 0.2f,  0.01f, "%.2f",
+            "Gradient descent step size. Too large causes oscillation; too small is slow.");
+        sliderF("FD Step",         &tuneMPC_.fd_step,        0.001f, 0.02f, 0.001f, "%.3f",
+            "Finite difference perturbation for Jacobian estimation in radians.");
+        sliderF("Rollout dt",      &tuneMPC_.rollout_dt,     0.01f, 0.2f,  0.01f, "%.2f s",
+            "Simulation time step used inside each prediction rollout.");
+        sliderF("Max Speed",       &tuneMPC_.max_speed,      0.1f, 20.0f,  0.1f,  "%.1f m/s",
+            "Target cruise speed the controller accelerates towards.");
+        sliderF("W Lateral",       &tuneMPC_.w_lat,          0.1f, 2.0f,   0.1f,  "%.1f",
+            "Cost weight on lateral (cross-track) error over the horizon.");
+        sliderF("W Heading",       &tuneMPC_.w_heading,      0.1f, 2.0f,   0.1f,  "%.1f",
+            "Cost weight on heading (yaw) error over the horizon.");
+        sliderF("W Control",       &tuneMPC_.w_control,      0.01f, 0.5f,  0.01f, "%.2f",
+            "Penalty on control effort magnitude. Higher = smoother steering.");
+        sliderI("Search Window",   &tuneMPC_.search_window,  20,   80,    1,
+            "Waypoints scanned ahead during rollout cost evaluation.");
+        sliderF("Max Delta",       &tuneMPC_.max_delta,      0.1f, 2.0f,   0.1f,  "%.1f rad",
+            "Hard clamp on the steering output angle in radians.");
+
+    } else { // Pure Pursuit
+        sliderF("Lookahead Dist",  &tunePP_.lookahead_distance, 0.1f, 10.0f, 0.1f, "%.1f m",
+            "Base lookahead distance. Added to the speed-scaled term: Ld = base + gain * speed.");
+        sliderF("Lookahead Gain",  &tunePP_.lookahead_gain,     0.1f, 1.0f,  0.1f, "%.1f",
+            "Speed multiplier for lookahead. Higher = farther look at higher speeds.");
+        sliderF("Max Speed",       &tunePP_.max_speed,          0.1f, 20.0f, 0.1f, "%.1f m/s",
+            "Target cruise speed the controller accelerates towards.");
+        sliderI("Search Window",   &tunePP_.search_window,      20,   80,    1,
+            "Waypoints scanned ahead when searching for the lookahead target point.");
+    }
+
+    ImGui::PopItemWidth();
+    ImGui::PopStyleVar();
+    if (!*enabled) ImGui::EndDisabled();
 }
 
 void VehicleControlUI::RenderSimulationScreen() {
@@ -678,17 +952,16 @@ void VehicleControlUI::RenderSimulationScreen() {
     {
         RenderNotification();
 
-        const char* saveButtonText = "Save Diagram";
-        ImVec2 textSize   = ImGui::CalcTextSize(saveButtonText);
+        const char* simBtnLabel = (simRunState_ == SIM_RUNNING) ? "Stop"
+                                : (simRunState_ == SIM_PAUSED)  ? "Resume"
+                                : (simRunState_ == SIM_DONE)    ? "Restart"
+                                :                                 "Start Simulation";
+        ImVec2 textSize   = ImGui::CalcTextSize(simBtnLabel);
         float buttonWidth  = textSize.x * 4.0f;
         float buttonHeight = textSize.y * 2.0f;
         float buttonX      = (frameWidth3 - buttonWidth) * 0.5f;
 
         // Start / Stop / Resume / Restart button near top
-        const char* simBtnLabel = (simRunState_ == SIM_RUNNING) ? "Stop"
-                                : (simRunState_ == SIM_PAUSED)  ? "Resume"
-                                : (simRunState_ == SIM_DONE)    ? "Restart"
-                                :                                 "Start Simulation";
         ImGui::SetCursorPos(ImVec2(buttonX, 20.0f));
         if (ImGui::Button(simBtnLabel, ImVec2(buttonWidth, buttonHeight))) {
             if (simRunState_ == SIM_RUNNING) {
@@ -731,14 +1004,54 @@ void VehicleControlUI::RenderSimulationScreen() {
         ImGui::SameLine();
         ImGui::TextColored(statusColor, "%s", statusStr);
 
-        float buttonY      = frameHeight3 - buttonHeight - 20.0f;
+        float statusRowBottom = infoY + 8.0f + rowH * 7;
+        float tuningHeight    = frameHeight3 - statusRowBottom - 24.0f;
 
-        ImGui::SetCursorPos(ImVec2(buttonX, buttonY));
-        if (ImGui::Button(saveButtonText, ImVec2(buttonWidth, buttonHeight))) {
-            std::cout << "Save Diagram clicked" << std::endl;
+        ImGui::SetCursorPos(ImVec2(10.0f, statusRowBottom + 8.0f));
+        RenderParamTuning(tuningHeight);
+    }
+    ImGui::EndChild();  // RightFrame
+
+    // Parameter hint tooltip — drawn on the foreground draw list so it is always
+    // on top regardless of ImGui window ordering or simulation restarts.
+    if (tooltipState_.lastHoverTime >= 0.0) {
+        double elapsed  = glfwGetTime() - tooltipState_.lastHoverTime;
+        float  relAlpha = (elapsed <= 0.0) ? 1.0f
+                        : std::max(0.0f, 1.0f - (float)(elapsed / 0.25));
+        if (relAlpha > 0.0f) {
+            const char* txt    = tooltipState_.description.c_str();
+            float       tipW   = tooltipState_.sliderMax.x - tooltipState_.sliderMin.x;
+            float       padX   = 8.0f;
+            float       padY   = 6.0f;
+            float       maxTW  = tipW - padX * 2.0f;
+
+            ImVec2 textSz = ImGui::CalcTextSize(txt, nullptr, false, maxTW);
+            float  rectH  = textSz.y + padY * 2.0f;
+
+            float  screenH = ImGui::GetIO().DisplaySize.y;
+            bool   above   = tooltipState_.sliderMax.y > screenH * 0.6f;
+            ImVec2 rMin    = above
+                ? ImVec2(tooltipState_.sliderMin.x, tooltipState_.sliderMin.y - 4.0f - rectH)
+                : ImVec2(tooltipState_.sliderMin.x, tooltipState_.sliderMax.y + 4.0f);
+            ImVec2 rMax    = ImVec2(rMin.x + tipW, rMin.y + rectH);
+
+            ImU32 bgCol  = IM_COL32(20, 20, 35,  (int)(255 * 0.75f * relAlpha));
+            ImU32 brCol  = IM_COL32(100, 120, 160, (int)(200        * relAlpha));
+            ImU32 txtCol = IM_COL32(255, 255, 255, (int)(255        * relAlpha));
+
+            ImDrawList* dl = ImGui::GetForegroundDrawList();
+            dl->AddRectFilled(rMin, rMax, bgCol, 4.0f);
+            dl->AddRect      (rMin, rMax, brCol, 4.0f);
+
+            // Center single-line text; left-align wrapped multi-line text
+            float textX = (textSz.y <= ImGui::GetTextLineHeight() + 1.0f)
+                        ? rMin.x + (tipW - textSz.x) * 0.5f
+                        : rMin.x + padX;
+            dl->AddText(ImGui::GetFont(), ImGui::GetFontSize(),
+                        ImVec2(textX, rMin.y + padY), txtCol,
+                        txt, nullptr, maxTW);
         }
     }
-    ImGui::EndChild();
 }
 
 void VehicleControlUI::ShowNotification(const std::string& title, const std::string& text, float duration_ms) {
