@@ -1,0 +1,74 @@
+{
+  "name": "Trapezoidal Course",
+  "world": {
+    "width": 120.0,
+    "height": 120.0
+  },
+  "start": {
+    "x": 10.0,
+    "y": 20.0
+  },
+  "goal": {
+    "x": 30.0,
+    "y": 100.0
+  },
+  "vehicle_radius": 1.2,
+  "obstacles": [
+    {
+      "id": "center_block",
+      "shape": "rectangle",
+      "x": 40.0,
+      "y": 35.0,
+      "width": 35.0,
+      "height": 30.0
+    },
+    {
+      "id": "inner_right_block",
+      "shape": "rectangle",
+      "x": 75.0,
+      "y": 30.0,
+      "width": 12.0,
+      "height": 15.0
+    },
+    {
+      "id": "bottom_left_corner",
+      "shape": "rectangle",
+      "x": 0.0,
+      "y": 0.0,
+      "width": 8.0,
+      "height": 16.0
+    },
+    {
+      "id": "bottom_right_corner",
+      "shape": "rectangle",
+      "x": 112.0,
+      "y": 0.0,
+      "width": 8.0,
+      "height": 16.0
+    },
+    {
+      "id": "top_left_corner",
+      "shape": "rectangle",
+      "x": 0.0,
+      "y": 103.0,
+      "width": 28.0,
+      "height": 17.0
+    },
+    {
+      "id": "top_right_corner",
+      "shape": "rectangle",
+      "x": 92.0,
+      "y": 103.0,
+      "width": 28.0,
+      "height": 17.0
+    },
+    {
+      "id": "left_outer_wall",
+      "shape": "rectangle",
+      "x": 0.0,
+      "y": 24.0,
+      "width": 5.0,
+      "height": 63.0
+    }
+  ]
+}
