@@ -1,0 +1,11 @@
+services:
+  vehicle-control:
+    build: .
+    image: vehicle-control-algorithms
+    environment:
+      - DISPLAY=${DISPLAY}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    network_mode: host
+    stdin_open: true
+    tty: true

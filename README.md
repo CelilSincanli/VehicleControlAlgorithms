@@ -81,6 +81,87 @@ make -j$(nproc)
 
 ---
 
+## Running with Docker
+
+Docker lets you build and run the simulation on **Ubuntu 20, 22, 24, and Windows 11** without setting up a local build environment. The image is based on Ubuntu 22.04 and works on any of these hosts.
+
+> **Why display forwarding?** Docker containers are headless by default. This application opens a real OpenGL window, so the container must forward its display output to the host's screen via X11.
+
+### Prerequisites
+
+- [Docker Engine](https://docs.docker.com/engine/install/) (Linux) **or** [Docker Desktop](https://www.docker.com/products/docker-desktop/) with WSL2 backend (Windows 11)
+- Docker Compose plugin (`docker compose` — included with Docker Desktop and recent Docker Engine installs)
+
+### Build the image
+
+```bash
+docker build -t vehicle-control-algorithms .
+```
+
+The multi-stage build compiles the project in a temporary builder stage and copies only the binary and runtime assets into the final image (~120 MB).
+
+---
+
+### Run on Linux (Ubuntu 20 / 22 / 24)
+
+Allow Docker to connect to your local X server, then launch with Compose:
+
+```bash
+xhost +local:docker
+docker compose up
+```
+
+Close the application window to stop the container. To revoke the X server permission afterwards:
+
+```bash
+xhost -local:docker
+```
+
+---
+
+### Run on Windows 11
+
+Windows 11 includes **WSLg** (WSL GUI support), which provides a built-in X/Wayland display server for WSL2 workloads. The easiest path is to run Docker from inside a WSL2 terminal, where the display is already set up automatically.
+
+**Step 1 — Install WSL2 with Ubuntu** (skip if already done):
+```powershell
+# Run in PowerShell as Administrator
+wsl --install -d Ubuntu-22.04
+```
+
+**Step 2 — Install Docker inside WSL2**:
+
+Open the Ubuntu terminal and follow the [Docker Engine install guide for Ubuntu](https://docs.docker.com/engine/install/ubuntu/).
+
+Alternatively, install [Docker Desktop](https://www.docker.com/products/docker-desktop/) on Windows and enable **WSL2 integration** for your Ubuntu distribution in *Settings → Resources → WSL Integration*.
+
+**Step 3 — Run from the WSL2 Ubuntu terminal**:
+```bash
+# Clone or navigate to the project inside WSL2
+xhost +local:docker
+docker compose up
+```
+
+The OpenGL window will appear on your Windows desktop via WSLg, just like any other WSL GUI application.
+
+---
+
+### Customise configs without rebuilding
+
+The `config/` and `data/` directories are baked into the image at build time. To edit algorithm parameters or add maps/vehicles without rebuilding, mount your local directories over the image copies:
+
+```bash
+docker run --rm \
+  -e DISPLAY=$DISPLAY \
+  -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+  -v "$(pwd)/config":/app/config \
+  -v "$(pwd)/data":/app/data \
+  --network host \
+  vehicle-control-algorithms
+```
+
+---
+
 ## Example Usage
 
 ### 1. Launch and configure
@@ -238,3 +319,7 @@ Create a JSON file under `data/vehicle/`, e.g. `data/vehicle/vehicle02.json`:
 | Pure Pursuit | Implemented — `PurePursuit::ComputeSteering()` returns wheel angle from look-ahead point |
 
 ---
+
+## License
+
+This project is licensed under the [Apache License 2.0](LICENSE).
