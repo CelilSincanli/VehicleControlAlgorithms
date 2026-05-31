@@ -238,11 +238,31 @@ The look-ahead point retrieved via `GetLookaheadPoint()` is also rendered as a y
 {
   "lookahead_distance": 5.0,
   "lookahead_gain": 0.5,
-  "max_speed": 5.0
+  "max_speed": 5.0,
+  "search_window": 40
 }
 ```
 
 `max_speed` is not a controller parameter — it is used by the proportional speed controller in the UI loop to set the target cruise speed.
+
+`search_window` defines how many waypoints ahead are scanned when searching for the closest point and the lookahead target. It is injected into `PurePursuitConfig` from the JSON (and the live tuning UI); it is not a field of the base algorithm class.
+
+---
+
+## Live Parameter Tuning
+
+All parameters in this file can be adjusted at runtime without recompiling or restarting the simulation:
+
+1. Enter the simulation screen and click **Start Simulation**.
+2. In the right panel, check **Override Defaults** under **Parameter Tuning**.
+3. Drag the desired slider; the new value takes effect the moment you release the mouse button.
+
+| Slider | Range | Step |
+|--------|-------|------|
+| Lookahead Dist | 0.1 – 10.0 m | 0.1 m |
+| Lookahead Gain | 0.1 – 1.0 | 0.1 |
+| Max Speed | 0.1 – 20.0 m/s | 0.1 m/s |
+| Search Window | 20 – 80 | 1 |
 
 ---
 

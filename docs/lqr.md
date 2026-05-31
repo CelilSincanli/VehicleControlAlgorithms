@@ -177,6 +177,9 @@ Edit `config/path_tracking/lqr.json` to tune the controller without recompiling:
 | `dare_iterations` | int | 150 | Maximum DARE solver iterations |
 | `dare_threshold` | float | 0.01 | DARE convergence threshold |
 
+`search_window` defines how many waypoints ahead are scanned when searching for the closest reference point.  
+`wheelbase` is injected from `VehicleData` at simulation start, not read from this file.
+
 ### Tuning Guidelines
 
 - **Increase `q0`/`q2`** → tighter lateral and heading tracking, more aggressive steering
@@ -185,7 +188,25 @@ Edit `config/path_tracking/lqr.json` to tune the controller without recompiling:
 - **Decrease `q1`/`q3`** → less penalty on error rates, faster initial response
 - **`q4`/`r_acceleration`** affect coupling in the Riccati solution but have minimal practical impact on steering since the acceleration row of K is unused
 
-`wheelbase` is injected from `VehicleData` at simulation start, not read from this file.
+---
+
+## Live Parameter Tuning
+
+All parameters in the table above can be adjusted at runtime without recompiling or restarting the simulation:
+
+1. Enter the simulation screen and click **Start Simulation**.
+2. In the right panel, check **Override Defaults** under **Parameter Tuning**.
+3. Drag the desired slider; the DARE solver is re-run with the new values the moment you release the mouse button.
+
+| Slider | Range | Step |
+|--------|-------|------|
+| Q0 – Q4 | 0.1 – 4.0 | 0.1 |
+| R Steering / R Acceleration / R Scale | 0.1 – 4.0 | 0.1 |
+| Time Step | 0.01 – 0.05 s | 0.01 s |
+| Max Speed | 0.1 – 20.0 m/s | 0.1 m/s |
+| DARE Iterations | 100 – 250 | 10 |
+| DARE Threshold | 0.01 – 0.05 | 0.01 |
+| Search Window | 20 – 80 | 1 |
 
 ---
 

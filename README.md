@@ -1,6 +1,6 @@
 # Vehicle Control Algorithms
 
-A desktop simulation environment for visualizing and testing vehicle path-tracking algorithms.
+A desktop simulation environment for visualising and testing vehicle path-tracking algorithms.
 Built with C++17, Dear ImGui, ImPlot, GLFW, and OpenGL 3.3.
 
 ---
@@ -9,8 +9,12 @@ Built with C++17, Dear ImGui, ImPlot, GLFW, and OpenGL 3.3.
 
 - **Main screen** — select a vehicle model, a path-tracking algorithm, and a map before launching the simulation.
 - **Simulation screen** — displays the loaded map (obstacles, start, goal) and the pre-computed reference path on an interactive Cartesian plot.
-- **JSON-driven configuration** — vehicles, maps, and paths are defined in plain JSON files; no recompilation needed to add new scenarios.
+- **Live parameter tuning** — right panel contains per-algorithm sliders that can override the JSON defaults mid-simulation. Enable with the **Override Defaults** checkbox; each slider applies its new value the moment the mouse is released.
+- **Hover tooltips** — hovering any parameter slider (while Override is active) shows a semi-transparent description of what the parameter controls. The tooltip fades out 0.25 s after the cursor moves away.
+- **Real-time telemetry** — speed (km/h) and steering angle (deg) are displayed live in the right info panel.
+- **JSON-driven configuration** — vehicles, maps, paths, and algorithm parameters are all defined in plain JSON files; no recompilation needed to add or tune scenarios.
 - **Auto-discovery** — the UI automatically lists all vehicle files and map directories found under `data/`.
+- **Application icon** — the window and dock entry display the project icon (`vca_application_icon.png`).
 
 ---
 
@@ -19,29 +23,54 @@ Built with C++17, Dear ImGui, ImPlot, GLFW, and OpenGL 3.3.
 ```
 VehicleControlAlgorithms/
 ├── CMakeLists.txt
+├── config/
+│   └── path_tracking/
+│       ├── adaptive_pure_pursuit.json
+│       ├── lqr.json
+│       ├── mpc.json
+│       ├── mppi.json
+│       ├── pure_pursuit.json
+│       └── stanley.json
 ├── data/
 │   ├── maps/
-│   │   ├── map_01/          # Corridor Map  (straight corridor with gaps)
+│   │   ├── map_01/          # Corridor Map
 │   │   │   ├── map.json
 │   │   │   └── path.json
-│   │   └── map_02/          # Sine Wave Course  (two-period sinusoidal weave)
+│   │   ├── map_02/          # Sine Wave Course
+│   │   │   ├── map.json
+│   │   │   └── path.json
+│   │   └── map_03/          # Trapezoidal Course
 │   │       ├── map.json
 │   │       └── path.json
 │   └── vehicle/
-│       └── vehicle01.json   # Bus 01 dynamics & geometry
+│       ├── vehicle01.json   # Bus 01 — city bus dynamics & geometry
+│       └── vehicle02.json   # Car 01 — passenger car dynamics & geometry
+├── docs/
+│   ├── lqr.md
+│   ├── pipeline.md
+│   └── pure_pursuit.md
 ├── include/
 │   ├── assets/
 │   │   ├── fonts/           # Nasalization TrueType font
-│   │   └── icons/           # Dripicons v2 font + dripicon_v2_icons.hpp
+│   │   ├── icons/           # Dripicons v2 font + dripicon_v2_icons.hpp
+│   │   └── images/          # Application icon (vca_application_icon.png)
 │   ├── map/
 │   │   ├── map_data.hpp     # MapData, PathData, Point2D, Obstacle structs
 │   │   └── map_loader.hpp   # MapLoader — loads map.json + path.json, discovers maps
 │   ├── path_tracking/
-│   │   └── pure_pursuit/
-│   │       └── pure_pursuit.hpp   # PurePursuit class
+│   │   ├── adaptive_pure_pursuit/
+│   │   ├── lqr/
+│   │   ├── mpc/
+│   │   ├── mppi/
+│   │   ├── pure_pursuit/
+│   │   ├── stanley/
+│   │   ├── config_reader.hpp          # Shared JSON key/value parser
+│   │   └── path_tracking_algorithm.hpp # IPathTrackingAlgorithm interface
 │   ├── vehicle/
-│   │   ├── vehicle_data.hpp       # VehicleData struct (dynamics + geometry)
-│   │   └── vehicle_loader.hpp     # VehicleLoader — loads vehicle JSON, discovers vehicles
+│   │   ├── vehicle_bicycle_model.hpp  # KinematicBicycleModel
+│   │   ├── vehicle_data.hpp           # VehicleData struct
+│   │   ├── vehicle_loader.hpp         # VehicleLoader
+│   │   └── vehicle_state.hpp          # VehicleState, VehicleControls
 │   ├── third_parties/       # ImGui, ImPlot, stb_image (vendored)
 │   └── vehicle_control_ui.hpp
 └── src/
@@ -50,9 +79,14 @@ VehicleControlAlgorithms/
     ├── map/
     │   └── map_loader.cpp
     ├── path_tracking/
-    │   └── pure_pursuit/
-    │       └── pure_pursuit.cpp
+    │   ├── adaptive_pure_pursuit/
+    │   ├── lqr/
+    │   ├── mpc/
+    │   ├── mppi/
+    │   ├── pure_pursuit/
+    │   └── stanley/
     └── vehicle/
+        ├── vehicle_bicycle_model.cpp
         └── vehicle_loader.cpp
 ```
 
@@ -174,7 +208,12 @@ On startup the main menu presents four steps. **Start Simulation** stays disable
 
 ### 2. Select a vehicle
 
-Click **Select Vehicle** to open the picker. All JSON files found under `data/vehicle/` are listed automatically. Select `vehicle01` to load the Bus 01 model.
+Click **Select Vehicle** to open the picker. All JSON files found under `data/vehicle/` are listed automatically.
+
+| File | Description |
+|------|-------------|
+| `vehicle01` | Bus 01 — 8 300 kg city bus, 4.335 m wheelbase |
+| `vehicle02` | Car 01 — 1 500 kg passenger car, 2.6 m wheelbase |
 
 ![Select Vehicle](docs/pics/menu/select_vehicle.png)
 
@@ -182,7 +221,16 @@ Click **Select Vehicle** to open the picker. All JSON files found under `data/ve
 
 ### 3. Select an algorithm
 
-Click **Select Algorithm** and choose the path-tracking controller to use. Currently **Pure Pursuit** is available.
+Click **Select Algorithm** and choose the path-tracking controller to use.
+
+| Algorithm | Description |
+|-----------|-------------|
+| Pure Pursuit | Geometric look-ahead controller |
+| Adaptive Pure Pursuit | Look-ahead scales with speed and path curvature |
+| LQR | Optimal state-feedback via discrete Riccati equation |
+| Stanley | Front-axle geometry with cross-track + heading correction |
+| MPC | Gradient-descent model predictive control |
+| MPPI | Sampling-based model predictive path integral control |
 
 ![Select Algorithm](docs/pics/menu/select_algorithm.png)
 
@@ -190,23 +238,38 @@ Click **Select Algorithm** and choose the path-tracking controller to use. Curre
 
 ### 4. Select a map
 
-Click **Select Map** to see all map directories discovered under `data/maps/`. Choose `map_01` (Corridor Map) or `map_02` (Sine Wave Course).
+Click **Select Map** to see all map directories discovered under `data/maps/`.
 
 ![Select Map](docs/pics/menu/select_map.png)
 
 ---
 
-### 5. Simulation screen — ready
+### 5. Simulation screen
 
-Once all three selections are confirmed, click **Start Simulation** from the main menu to enter the simulation screen. The 120 m × 120 m map is drawn with obstacles (grey), the reference path (green), the start marker (circle) and the goal marker (square). The right panel shows vehicle speed and status. Click **Start Simulation** in the right panel to begin.
+Once all three selections are confirmed, click **Start Simulation** from the main menu. The map is drawn with obstacles (grey), the reference path (green), the start marker (circle), and the goal marker (square). The right panel shows the Simulation Info and Parameter Tuning sections.
+
+Click **Start Simulation** in the right panel to begin.
 
 ![Simulation Screen](docs/pics/simulation/simulation.png)
 
 ---
 
-### 6. Pure Pursuit running
+### 6. Live parameter tuning
 
-With the simulation running the vehicle (blue rectangle) follows the reference path. The yellow dot is the current lookahead target; the blue dot trail shows where the rear axle has been. Speed and status update in real time in the right panel. Click **Stop** to pause or **Restart** to run again from the start position.
+The **Parameter Tuning** section in the right panel is available at all times on the simulation screen:
+
+1. Check **Override Defaults** — the checkbox turns green and all sliders for the active algorithm become interactive.
+2. Drag any slider to the desired value. The algorithm is rebuilt with the new value the moment you release the mouse button.
+3. Hover a slider to see a description tooltip that fades out 0.25 s after the cursor moves away.
+4. Uncheck **Override Defaults** to restore JSON defaults on the next simulation start.
+
+When Override is not enabled, sliders are visible but greyed out, showing the currently loaded default values.
+
+---
+
+### 7. Pure Pursuit running
+
+With the simulation running the vehicle (blue rectangle) follows the reference path. The yellow dot is the current lookahead target; the blue dot trail shows where the rear axle has been. Speed and steering angle update in real time in the right panel. Click **Stop** to pause or **Restart** to run again from the start position.
 
 ![Pure Pursuit Running](docs/pics/path_tracking/pure_pursuit/pure_pursuit.png)
 
@@ -216,7 +279,7 @@ With the simulation running the vehicle (blue rectangle) follows the reference p
 
 ## Adding a New Map
 
-1. Create a directory under `data/maps/`, e.g. `data/maps/map_03/`.
+1. Create a directory under `data/maps/`, e.g. `data/maps/map_04/`.
 2. Add `map.json` following the schema:
 
 ```json
@@ -251,7 +314,7 @@ The map will appear automatically in the **Select Map** popup at next launch.
 
 ## Adding a New Vehicle
 
-Create a JSON file under `data/vehicle/`, e.g. `data/vehicle/vehicle02.json`:
+Create a JSON file under `data/vehicle/`, e.g. `data/vehicle/vehicle03.json`:
 
 ```json
 {
@@ -264,6 +327,7 @@ Create a JSON file under `data/vehicle/`, e.g. `data/vehicle/vehicle02.json`:
   "max_steering_wheel_angle": 720.0,
   "min_steering_wheel_angle": -720.0,
   "max_steering_wheel_rate": 400.0,
+  "steering_wheel_to_tire_angle_ratio": 14.0,
   "wheelbase": 2.5,
   "wheel_radius": 0.32,
   "wheel_width": 0.20,
@@ -279,12 +343,13 @@ Create a JSON file under `data/vehicle/`, e.g. `data/vehicle/vehicle02.json`:
 | Field | Description | Unit |
 |-------|-------------|------|
 | `mass` | Vehicle mass | kg |
-| `a` | Distance from **front axle** to COG. COG position from vehicle front = `front_overhang + a`. For Bus 01: 2.37 + 2.0 = 4.37 m (~50 % of total length 8.72 m) | m |
-| `b` | Distance from **rear axle** to COG. Must satisfy `a + b = wheelbase`. For Bus 01: 2.0 + 2.335 = 4.335 m | m |
-| `CA` | Mass-normalised aerodynamic drag coefficient. Formula: `CA = (0.5 × ρ × Cd × Af) / mass` where ρ = 1.225 kg/m³, Af = vehicle width × height. Typical Cd: passenger car 0.25–0.30, SUV 0.30–0.35, bus 0.60–0.80. For Bus 01: Cd = 0.70, Af = 2.47 × 3.09 = 7.63 m² → CA = (0.5 × 1.225 × 0.70 × 7.63) / 8300 = 0.000394 | 1/m |
+| `a` | Distance from **front axle** to COG | m |
+| `b` | Distance from **rear axle** to COG. Must satisfy `a + b = wheelbase` | m |
+| `CA` | Mass-normalised aerodynamic drag coefficient: `(0.5 × ρ × Cd × Af) / mass` | 1/m |
 | `minimum_turning_radius` | Minimum kinematic turning radius | m |
 | `max/min_steering_wheel_angle` | Steering wheel travel limits | deg |
 | `max_steering_wheel_rate` | Maximum steering rate | deg/s |
+| `steering_wheel_to_tire_angle_ratio` | Steering ratio (steering wheel deg / tyre deg) | — |
 | `wheelbase` | Front-to-rear axle distance | m |
 | `wheel_radius` | Loaded tyre radius | m |
 | `wheel_width` | Tyre section width | m |
@@ -297,9 +362,13 @@ Create a JSON file under `data/vehicle/`, e.g. `data/vehicle/vehicle02.json`:
 
 ## Adding a New Path-Tracking Algorithm
 
-1. Create `include/path_tracking/<algo>/<algo>.hpp` and `src/path_tracking/<algo>/<algo>.cpp`.
-2. Add the source file to `CMakeLists.txt`.
-3. Add the display name to `kAvailableAlgorithms` in `src/vehicle_control_ui.cpp`.
+1. Create `include/path_tracking/<algo>/<algo>.hpp` and `src/path_tracking/<algo>/<algo>.cpp` implementing `IPathTrackingAlgorithm`.
+2. Create `include/path_tracking/<algo>/<algo>_loader.hpp` and `src/path_tracking/<algo>/<algo>_loader.cpp`.
+3. Add `config/path_tracking/<algo>.json` with the default parameters.
+4. Add the source files to `CMakeLists.txt`.
+5. Add the display name to `kAvailableAlgorithms` in `src/vehicle_control_ui.cpp`.
+6. Add a JSON-loading block and a tuning struct to `InitSimulation()` / `RebuildAlgorithm()` in `vehicle_control_ui.cpp`, following the pattern of the existing algorithms.
+7. Add a slider block for the new algorithm inside `RenderParamTuning()`.
 
 ---
 
@@ -309,14 +378,22 @@ Create a JSON file under `data/vehicle/`, e.g. `data/vehicle/vehicle02.json`:
 |-----|-------------|
 | **map_01** — Corridor Map | 120 m × 120 m. Three pairs of offset wall segments create a slalom. Tests gap navigation with large heading changes. |
 | **map_02** — Sine Wave Course | 120 m × 120 m. Two-period sinusoidal weave (amplitude ±24 m, period 54 m). Four alternating baffles force the path high and low. |
+| **map_03** — Trapezoidal Course | 120 m × 120 m. A large central block flanked by corner barriers forces the path around a trapezoidal circuit. Tests multi-turn navigation and constrained start/goal positions. |
 
 ---
 
 ## Included Algorithms
 
-| Algorithm | Status |
-|-----------|--------|
-| Pure Pursuit | Implemented — `PurePursuit::ComputeSteering()` returns wheel angle from look-ahead point |
+| Algorithm | Config file | Key parameters |
+|-----------|-------------|----------------|
+| **Pure Pursuit** | `pure_pursuit.json` | `lookahead_distance`, `lookahead_gain`, `max_speed`, `search_window` |
+| **Adaptive Pure Pursuit** | `adaptive_pure_pursuit.json` | `min_lookahead`, `max_lookahead`, `speed_gain`, `curvature_gain`, `max_speed`, `search_window` |
+| **LQR** | `lqr.json` | Q/R matrices, `time_step`, `dare_iterations`, `dare_threshold`, `max_speed`, `search_window` |
+| **Stanley** | `stanley.json` | `stanley_gain`, `min_speed`, `max_speed`, `max_delta`, `search_window` |
+| **MPC** | `mpc.json` | `horizon_N`, `iterations`, `learning_rate`, `fd_step`, `rollout_dt`, cost weights, `max_delta`, `search_window` |
+| **MPPI** | `mppi.json` | `horizon_T`, `num_samples_K`, `lambda`, `sigma_steer`, `rollout_dt`, cost weights, `max_delta`, `rng_seed`, `search_window` |
+
+All parameters for all algorithms can be adjusted live at runtime via the **Parameter Tuning** panel in the simulation screen without recompiling or restarting.
 
 ---
 
