@@ -62,6 +62,16 @@ bool VehicleControlUI::Initialize() {
         return false;
     }
 
+    {
+        int w, h, ch;
+        unsigned char* px = stbi_load(IMAGE_PATH "/vca_application_icon.png", &w, &h, &ch, 4);
+        if (px) {
+            GLFWimage icon{ w, h, px };
+            glfwSetWindowIcon(window, 1, &icon);
+            stbi_image_free(px);
+        }
+    }
+
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 

@@ -7,6 +7,7 @@ find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 
 add_definitions(-DASSET_PATH="${CMAKE_SOURCE_DIR}/include/assets/fonts")
+add_definitions(-DIMAGE_PATH="${CMAKE_SOURCE_DIR}/include/assets/images")
 add_definitions(-DDATA_PATH="${CMAKE_SOURCE_DIR}/data")
 add_definitions(-DCONFIG_PATH="${CMAKE_SOURCE_DIR}/config")
 
