@@ -9,7 +9,7 @@
   "minimum_turning_radius":   4.6,
   "max_steering_wheel_angle": 900.0,
   "min_steering_wheel_angle": -900.0,
-  "max_steering_wheel_rate":  300.0,
+  "max_steering_wheel_rate":  250.0,
   "steering_wheel_to_tire_angle_ratio": 16.0,
 
   "wheelbase":      4.335,

@@ -1,0 +1,25 @@
+{
+  "name": "Car 01",
+
+  "mass":  1500.0,
+  "a":     1.1,
+  "b":     1.5,
+  "CA":    0.000250,
+
+  "minimum_turning_radius": 5.3,
+  "max_steering_wheel_angle": 500.0,
+  "min_steering_wheel_angle": -500.0,
+  "max_steering_wheel_rate":  200.0,
+  "steering_wheel_to_tire_angle_ratio": 15.5,
+
+  "wheelbase":      2.6,
+  "wheel_radius":   0.318,
+  "wheel_width":    0.225,
+  "wheel_tread":    1.55,
+
+  "front_overhang":  0.850,
+  "rear_overhang":   0.750,
+  "left_overhang":   0.10,
+  "right_overhang":  0.10,
+  "vehicle_height":  1.45
+}
