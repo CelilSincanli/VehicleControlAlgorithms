@@ -19,6 +19,9 @@ MppiFileConfig LoadMppiConfig(const std::string& path) {
     readFloat(src, "max_speed",     cfg.max_speed_mps);
     readFloat(src, "w_lat",         cfg.w_lat);
     readFloat(src, "w_heading",     cfg.w_heading);
+    readInt  (src, "search_window", cfg.search_window);
+    readFloat(src, "max_delta",     cfg.max_delta);
+    readInt  (src, "rng_seed",      cfg.rng_seed);
     cfg.loaded = true;
     return cfg;
 }

@@ -16,6 +16,7 @@ AdaptivePurePursuitFileConfig LoadAdaptivePurePursuitConfig(const std::string& p
     readFloat(src, "speed_gain",     cfg.speed_gain);
     readFloat(src, "curvature_gain", cfg.curvature_gain);
     readFloat(src, "max_speed",      cfg.max_speed_mps);
+    readInt  (src, "search_window",  cfg.search_window);
     cfg.loaded = true;
     return cfg;
 }

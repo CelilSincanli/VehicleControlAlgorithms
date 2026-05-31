@@ -159,7 +159,7 @@ float Lqr::ComputeSteering(const vehicle::VehicleState& state) const {
 
 int Lqr::FindClosestWaypoint(const vehicle::VehicleState& state) const {
     int start    = current_path_idx_;
-    int end      = std::min((int)path_.size(), start + 40);
+    int end      = std::min((int)path_.size(), start + config_.search_window);
     int idx      = start;
     float min_d2 = std::numeric_limits<float>::max();
     for (int i = start; i < end; ++i) {

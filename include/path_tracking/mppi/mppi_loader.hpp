@@ -12,6 +12,9 @@ struct MppiFileConfig {
     float max_speed_mps = 5.0f;
     float w_lat         = 1.0f;
     float w_heading     = 0.5f;
+    int   search_window = 40;
+    float max_delta     = 1.0f;
+    int   rng_seed      = 42;
     bool  loaded        = false;
 };
 

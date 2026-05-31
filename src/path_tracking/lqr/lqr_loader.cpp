@@ -23,6 +23,7 @@ LqrFileConfig LoadLqrConfig(const std::string& path) {
     readFloat(src, "max_speed",       cfg.max_speed);
     readInt  (src, "dare_iterations", cfg.dare_iterations);
     readFloat(src, "dare_threshold",  cfg.dare_threshold);
+    readInt  (src, "search_window",   cfg.search_window);
     cfg.loaded = true;
     return cfg;
 }

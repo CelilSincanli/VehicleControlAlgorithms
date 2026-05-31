@@ -9,6 +9,7 @@ struct AdaptivePurePursuitFileConfig {
     float speed_gain     = 0.5f;
     float curvature_gain = 3.0f;
     float max_speed_mps  = 5.0f;
+    int   search_window  = 40;
     bool  loaded         = false;
 };
 

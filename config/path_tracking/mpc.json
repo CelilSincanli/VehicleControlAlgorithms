@@ -5,7 +5,9 @@
     "fd_step": 0.01,
     "rollout_dt": 0.1,
     "max_speed": 5.0,
-    "w_lat": 1.0,
-    "w_heading": 0.5,
-    "w_control": 0.05
+    "w_lat":         1.0,
+    "w_heading":     0.5,
+    "w_control":     0.05,
+    "search_window": 40,
+    "max_delta":     1.0
 }

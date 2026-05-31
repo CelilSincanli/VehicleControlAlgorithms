@@ -3,5 +3,6 @@
   "max_lookahead":  8.0,
   "speed_gain":     0.5,
   "curvature_gain": 3.0,
-  "max_speed":      5.0
+  "max_speed":      5.0,
+  "search_window":  40
 }

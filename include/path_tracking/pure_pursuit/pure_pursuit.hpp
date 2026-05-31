@@ -8,6 +8,7 @@ struct PurePursuitConfig {
     float lookahead_distance = 2.0f;  // minimum lookahead [m]
     float lookahead_gain     = 0.3f;  // Ld = lookahead_gain * |v| + lookahead_distance
     float wheelbase          = 0.5f;
+    int   search_window      = 40;    // max waypoints to scan ahead for nearest point
 };
 
 class PurePursuit : public IPathTrackingAlgorithm {
@@ -25,8 +26,6 @@ private:
     std::vector<Point2D> path_;
     mutable Point2D      last_lookahead_{};
     mutable int          current_path_idx_ = 0;
-
-    static constexpr int kSearchWindow = 40;  // max waypoints to scan ahead
 
     int     FindClosestWaypoint(const vehicle::VehicleState& state) const;
     Point2D FindLookaheadPoint (const vehicle::VehicleState& state, int closest_idx, float ld) const;

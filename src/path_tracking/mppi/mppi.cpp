@@ -7,7 +7,7 @@
 
 namespace path_tracking {
 
-Mppi::Mppi(const MppiConfig& config) : config_(config) {}
+Mppi::Mppi(const MppiConfig& config) : config_(config), rng_(config.rng_seed) {}
 
 void Mppi::SetPath(const std::vector<Point2D>& waypoints) {
     path_ = waypoints;
@@ -28,7 +28,7 @@ void Mppi::SetPath(const std::vector<Point2D>& waypoints) {
 
 int Mppi::FindNearestWaypoint(float x, float y, int from_idx) const {
     const int n   = static_cast<int>(path_.size());
-    const int end = std::min(from_idx + kSearchWindow, n);
+    const int end = std::min(from_idx + config_.search_window, n);
     float best    = std::numeric_limits<float>::max();
     int   result  = from_idx;
     for (int i = from_idx; i < end; ++i) {
@@ -97,7 +97,7 @@ float Mppi::ComputeSteering(const vehicle::VehicleState& state) const {
         for (int t = 0; t < T; ++t) {
             eps[k][t] = config_.sigma_steer * noise_dist_(rng_);
             float v_kt = u_[t] + eps[k][t];
-            v_kt = std::max(-kMaxDelta, std::min(kMaxDelta, v_kt));
+            v_kt = std::max(-config_.max_delta, std::min(config_.max_delta, v_kt));
             v_seq[t] = v_kt;
         }
         costs[k] = RolloutCost(state.x, state.y, state.heading, v_seq, nearest);
@@ -118,7 +118,7 @@ float Mppi::ComputeSteering(const vehicle::VehicleState& state) const {
         for (int k = 0; k < K; ++k)
             weighted_eps += weights[k] * eps[k][t];
         u_[t] += weighted_eps / weight_sum;
-        u_[t] = std::max(-kMaxDelta, std::min(kMaxDelta, u_[t]));
+        u_[t] = std::max(-config_.max_delta, std::min(config_.max_delta, u_[t]));
     }
 
     return u_[0];

@@ -386,6 +386,7 @@ void VehicleControlUI::InitSimulation() {
         cfg.speed_gain     = fcfg.speed_gain;
         cfg.curvature_gain = fcfg.curvature_gain;
         cfg.wheelbase      = vd.wheelbase;
+        cfg.search_window  = fcfg.search_window;
         simPursuit_ = std::make_unique<path_tracking::AdaptivePurePursuit>(cfg);
     } else if (selectedAlgorithm_ == "LQR") {
         auto fcfg = path_tracking::LoadLqrConfig(
@@ -404,17 +405,20 @@ void VehicleControlUI::InitSimulation() {
         cfg.max_speed      = fcfg.max_speed;
         cfg.dare_iterations = fcfg.dare_iterations;
         cfg.dare_threshold  = fcfg.dare_threshold;
-        cfg.wheelbase      = vd.wheelbase;
+        cfg.wheelbase       = vd.wheelbase;
+        cfg.search_window   = fcfg.search_window;
         simPursuit_ = std::make_unique<path_tracking::Lqr>(cfg);
     } else if (selectedAlgorithm_ == "Stanley") {
         auto fcfg = path_tracking::LoadStanleyConfig(
                         std::string(CONFIG_PATH) + "/path_tracking/stanley.json");
         simMaxSpeed_ = fcfg.max_speed_mps;
         path_tracking::StanleyConfig cfg;
-        cfg.stanley_gain = fcfg.stanley_gain;
-        cfg.min_speed    = fcfg.min_speed;
-        cfg.max_speed    = fcfg.max_speed_mps;
-        cfg.wheelbase    = vd.wheelbase;
+        cfg.stanley_gain  = fcfg.stanley_gain;
+        cfg.min_speed     = fcfg.min_speed;
+        cfg.max_speed     = fcfg.max_speed_mps;
+        cfg.max_delta     = fcfg.max_delta;
+        cfg.wheelbase     = vd.wheelbase;
+        cfg.search_window = fcfg.search_window;
         simPursuit_ = std::make_unique<path_tracking::Stanley>(cfg);
     } else if (selectedAlgorithm_ == "MPPI") {
         auto fcfg = path_tracking::LoadMppiConfig(
@@ -430,6 +434,9 @@ void VehicleControlUI::InitSimulation() {
         cfg.w_lat         = fcfg.w_lat;
         cfg.w_heading     = fcfg.w_heading;
         cfg.wheelbase     = vd.wheelbase;
+        cfg.search_window = fcfg.search_window;
+        cfg.max_delta     = fcfg.max_delta;
+        cfg.rng_seed      = fcfg.rng_seed;
         simPursuit_ = std::make_unique<path_tracking::Mppi>(cfg);
     } else if (selectedAlgorithm_ == "MPC") {
         auto fcfg = path_tracking::LoadMpcConfig(
@@ -446,6 +453,8 @@ void VehicleControlUI::InitSimulation() {
         cfg.w_heading     = fcfg.w_heading;
         cfg.w_control     = fcfg.w_control;
         cfg.wheelbase     = vd.wheelbase;
+        cfg.search_window = fcfg.search_window;
+        cfg.max_delta     = fcfg.max_delta;
         simPursuit_ = std::make_unique<path_tracking::Mpc>(cfg);
     } else {
         auto fcfg = path_tracking::LoadPurePursuitConfig(
@@ -455,6 +464,7 @@ void VehicleControlUI::InitSimulation() {
         cfg.lookahead_distance = fcfg.lookahead_distance;
         cfg.lookahead_gain     = fcfg.lookahead_gain;
         cfg.wheelbase          = vd.wheelbase;
+        cfg.search_window      = fcfg.search_window;
         simPursuit_ = std::make_unique<path_tracking::PurePursuit>(cfg);
     }
     simPursuit_->SetPath(simScaledPath_);

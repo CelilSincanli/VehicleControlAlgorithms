@@ -27,7 +27,7 @@ void Mpc::SetPath(const std::vector<Point2D>& waypoints) {
 
 int Mpc::FindNearestWaypoint(float x, float y, int from_idx) const {
     const int n   = static_cast<int>(path_.size());
-    const int end = std::min(from_idx + kSearchWindow, n);
+    const int end = std::min(from_idx + config_.search_window, n);
     float best    = std::numeric_limits<float>::max();
     int   result  = from_idx;
     for (int i = from_idx; i < end; ++i) {
@@ -95,14 +95,14 @@ float Mpc::ComputeSteering(const vehicle::VehicleState& state) const {
         std::vector<float> grad(N);
         for (int t = 0; t < N; ++t) {
             float saved = u_[t];
-            u_[t] = std::max(-kMaxDelta, std::min(kMaxDelta, saved + fd));
+            u_[t] = std::max(-config_.max_delta, std::min(config_.max_delta, saved + fd));
             grad[t] = (RolloutCost(state.x, state.y, state.heading, u_, nearest) - j0) / fd;
             u_[t] = saved;
         }
 
         for (int t = 0; t < N; ++t) {
             u_[t] -= lr * grad[t];
-            u_[t] = std::max(-kMaxDelta, std::min(kMaxDelta, u_[t]));
+            u_[t] = std::max(-config_.max_delta, std::min(config_.max_delta, u_[t]));
         }
     }
 

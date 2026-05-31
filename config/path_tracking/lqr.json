@@ -10,5 +10,6 @@
   "time_step": 0.016,
   "max_speed": 3.0,
   "dare_iterations": 150,
-  "dare_threshold": 0.01
+  "dare_threshold": 0.01,
+  "search_window": 40
 }

@@ -14,6 +14,7 @@ PurePursuitFileConfig LoadPurePursuitConfig(const std::string& path) {
     readFloat(src, "lookahead_distance", cfg.lookahead_distance);
     readFloat(src, "lookahead_gain",     cfg.lookahead_gain);
     readFloat(src, "max_speed",          cfg.max_speed_mps);
+    readInt  (src, "search_window",      cfg.search_window);
     cfg.loaded = true;
     return cfg;
 }

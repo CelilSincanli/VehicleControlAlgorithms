@@ -24,7 +24,7 @@ float Stanley::ComputePathYaw(int index) const {
 
 int Stanley::FindNearestWaypoint(float fx, float fy) const {
     const int n      = static_cast<int>(path_.size());
-    const int end    = std::min(current_path_idx_ + kSearchWindow, n);
+    const int end    = std::min(current_path_idx_ + config_.search_window, n);
     float     best   = std::numeric_limits<float>::max();
     int       result = current_path_idx_;
 
@@ -62,8 +62,7 @@ float Stanley::ComputeSteering(const vehicle::VehicleState& state) const {
 
     float delta = -(heading_error + std::atan2(config_.stanley_gain * e_lat, speed_guard));
 
-    // Clamp to a sensible steering limit (±1 rad ≈ ±57°, matches bus geometry).
-    return std::max(-1.0f, std::min(1.0f, delta));
+    return std::max(-config_.max_delta, std::min(config_.max_delta, delta));
 }
 
 } // namespace path_tracking

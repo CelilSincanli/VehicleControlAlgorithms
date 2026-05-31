@@ -13,6 +13,8 @@ struct MpcFileConfig {
     float w_lat         = 1.0f;
     float w_heading     = 0.5f;
     float w_control     = 0.05f;
+    int   search_window = 40;
+    float max_delta     = 1.0f;
     bool  loaded        = false;
 };
 

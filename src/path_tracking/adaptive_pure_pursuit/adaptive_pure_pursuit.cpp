@@ -37,7 +37,7 @@ float AdaptivePurePursuit::ComputeSteering(const vehicle::VehicleState& state) c
 
 int AdaptivePurePursuit::FindClosestWaypoint(const vehicle::VehicleState& state) const {
     int start = current_path_idx_;
-    int end   = std::min((int)path_.size(), start + kSearchWindow);
+    int end   = std::min((int)path_.size(), start + config_.search_window);
     int idx   = start;
     float min_dist = std::numeric_limits<float>::max();
     for (int i = start; i < end; ++i) {

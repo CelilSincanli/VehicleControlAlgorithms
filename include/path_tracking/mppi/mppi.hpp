@@ -15,6 +15,9 @@ struct MppiConfig {
     float max_speed     = 5.0f;
     float w_lat         = 1.0f;  // lateral error weight
     float w_heading     = 0.5f;  // heading error weight
+    int   search_window = 40;    // max waypoints to scan ahead for nearest point
+    float max_delta     = 1.0f;  // steering output clamp [rad]
+    int   rng_seed      = 42;    // random seed for reproducible noise sampling
 };
 
 class Mppi : public IPathTrackingAlgorithm {
@@ -35,11 +38,8 @@ private:
     mutable std::vector<float> u_;
     mutable Point2D      target_point_{};
     mutable int          current_path_idx_ = 0;
-    mutable std::mt19937 rng_{42};
+    mutable std::mt19937 rng_;
     mutable std::normal_distribution<float> noise_dist_{0.0f, 1.0f};
-
-    static constexpr int   kSearchWindow = 40;
-    static constexpr float kMaxDelta     = 1.0f;
 
     float RolloutCost(float x0, float y0, float psi0,
                       const std::vector<float>& controls,

@@ -1,5 +1,7 @@
 {
-    "stanley_gain": 0.5,
-    "min_speed": 0.1,
-    "max_speed": 5.0
+    "stanley_gain":  0.5,
+    "min_speed":     0.1,
+    "max_speed":     5.0,
+    "max_delta":     1.0,
+    "search_window": 40
 }

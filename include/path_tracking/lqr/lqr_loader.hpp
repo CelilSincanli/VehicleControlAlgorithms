@@ -16,6 +16,7 @@ struct LqrFileConfig {
     float max_speed      = 5.0f;
     int   dare_iterations = 150;
     float dare_threshold  = 0.01f;
+    int   search_window   = 40;
     bool  loaded          = false;
 };
 

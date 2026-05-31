@@ -20,6 +20,8 @@ MpcFileConfig LoadMpcConfig(const std::string& path) {
     readFloat(src, "w_lat",         cfg.w_lat);
     readFloat(src, "w_heading",     cfg.w_heading);
     readFloat(src, "w_control",     cfg.w_control);
+    readInt  (src, "search_window", cfg.search_window);
+    readFloat(src, "max_delta",     cfg.max_delta);
     cfg.loaded = true;
     return cfg;
 }

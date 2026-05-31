@@ -15,6 +15,8 @@ struct MpcConfig {
     float w_lat         = 1.0f;  // lateral error weight
     float w_heading     = 0.5f;  // heading error weight
     float w_control     = 0.05f; // control effort penalty (Σ δ²)
+    int   search_window = 40;    // max waypoints to scan ahead for nearest point
+    float max_delta     = 1.0f;  // steering output clamp [rad]
 };
 
 class Mpc : public IPathTrackingAlgorithm {
@@ -35,9 +37,6 @@ private:
     mutable std::vector<float> u_;
     mutable Point2D      target_point_{};
     mutable int          current_path_idx_ = 0;
-
-    static constexpr int   kSearchWindow = 40;
-    static constexpr float kMaxDelta     = 1.0f;
 
     float RolloutCost(float x0, float y0, float psi0,
                       const std::vector<float>& controls,

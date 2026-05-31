@@ -9,6 +9,8 @@ struct StanleyConfig {
     float wheelbase    = 4.0f;  // L [m]  — set from VehicleData at startup
     float min_speed    = 0.1f;  // v_min — divide-by-zero guard [m/s]
     float max_speed    = 5.0f;
+    float max_delta    = 1.0f;  // steering output clamp [rad]
+    int   search_window = 40;   // max waypoints to scan ahead for nearest point
 };
 
 class Stanley : public IPathTrackingAlgorithm {
@@ -26,8 +28,6 @@ private:
     std::vector<Point2D> path_;
     mutable Point2D      target_point_{};
     mutable int          current_path_idx_ = 0;
-
-    static constexpr int kSearchWindow = 40;
 
     int   FindNearestWaypoint(float fx, float fy) const;
     float ComputePathYaw(int index) const;

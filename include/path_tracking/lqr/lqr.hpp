@@ -23,6 +23,8 @@ struct LqrConfig {
     // DARE solver
     int   dare_iterations = 150;
     float dare_threshold  = 0.01f;
+    // Path search
+    int   search_window   = 40;   // max waypoints to scan ahead for nearest point
 };
 
 class Lqr : public IPathTrackingAlgorithm {
