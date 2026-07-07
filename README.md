@@ -185,6 +185,7 @@ The OpenGL window will appear on your Windows desktop via WSLg, just like any ot
 The `config/` and `data/` directories are baked into the image at build time. To edit algorithm parameters or add maps/vehicles without rebuilding, mount your local directories over the image copies:
 
 ```bash
+xhost +local:docker
 docker run --rm \
   -e DISPLAY=$DISPLAY \
   -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
@@ -193,6 +194,14 @@ docker run --rm \
   --network host \
   vehicle-control-algorithms
 ```
+
+---
+
+### Troubleshooting
+
+**`No protocol specified` / `GLFW Error 65544: X11: Failed to open display`**
+
+The container couldn't authenticate with your host's X server. Run `xhost +local:docker` in a terminal on the host before starting the container (this is a per-login-session setting, so it's easy to forget after a reboot or after closing the terminal it was set in). Revoke access afterwards with `xhost -local:docker`.
 
 ---
 
