@@ -5,6 +5,12 @@
   "a":     1.1,
   "b":     1.5,
   "CA":    0.000250,
+  "cog_height":  0.65,
+  "yaw_inertia": 1960.0,
+
+  "max_acceleration": 2.5,
+  "max_deceleration": 4.0,
+  "max_jerk":         2.5,
 
   "minimum_turning_radius": 5.3,
   "max_steering_wheel_angle": 500.0,
@@ -21,5 +27,16 @@
   "rear_overhang":   0.750,
   "left_overhang":   0.10,
   "right_overhang":  0.10,
-  "vehicle_height":  1.45
+  "vehicle_height":  1.45,
+
+  "tire": {
+    "cornering_stiffness_coeff": 9.0,
+    "friction_coefficient":      0.95
+  },
+  "suspension": {
+    "enabled": true
+  },
+  "steering": {
+    "use_rate_limit": true
+  }
 }
