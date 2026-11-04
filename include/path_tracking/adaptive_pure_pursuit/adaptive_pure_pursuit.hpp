@@ -28,6 +28,7 @@ private:
     std::vector<Point2D>      path_;
     mutable Point2D           last_lookahead_{};
     mutable int               current_path_idx_ = 0;
+    mutable bool              seeded_ = false;   // first call searches the whole path
 
     int     FindClosestWaypoint(const vehicle::VehicleState& state) const;
     Point2D FindLookaheadPoint (const vehicle::VehicleState& state, int closest_idx, float ld) const;

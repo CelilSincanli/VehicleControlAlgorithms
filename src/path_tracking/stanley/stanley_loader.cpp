@@ -11,11 +11,15 @@ StanleyFileConfig LoadStanleyConfig(const std::string& path) {
     if (!f.is_open()) return cfg;
     std::string src((std::istreambuf_iterator<char>(f)),
                      std::istreambuf_iterator<char>());
-    readFloat(src, "stanley_gain",  cfg.stanley_gain);
-    readFloat(src, "min_speed",     cfg.min_speed);
-    readFloat(src, "max_speed",     cfg.max_speed_mps);
-    readFloat(src, "max_delta",     cfg.max_delta);
-    readInt  (src, "search_window", cfg.search_window);
+    // Every value is clamped into the slider range (tuning_limits.hpp); values
+    // that were not numbers or out of range are listed in cfg.warnings.
+    ConfigReader r(src);
+    r.Float("stanley_gain",  cfg.stanley_gain, tuning::kStanleyGain);
+    r.Float("min_speed",     cfg.min_speed, tuning::kStanleyMinSpeed);
+    r.Float("max_speed",     cfg.max_speed_mps, tuning::kMaxSpeed);
+    r.Float("max_delta",     cfg.max_delta, tuning::kMaxDelta);
+    r.Int  ("search_window", cfg.search_window, tuning::kSearchWindow);
+    cfg.warnings = r.warnings();
     cfg.loaded = true;
     return cfg;
 }

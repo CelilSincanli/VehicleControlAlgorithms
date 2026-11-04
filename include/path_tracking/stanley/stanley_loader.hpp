@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 
 namespace path_tracking {
 
@@ -9,6 +10,7 @@ struct StanleyFileConfig {
     float max_speed_mps = 5.0f;
     float max_delta     = 1.0f;
     int   search_window = 40;
+    std::vector<std::string> warnings;   // values clamped or not parsable
     bool  loaded        = false;
 };
 
