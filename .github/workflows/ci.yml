@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    name: Core + tests (headless)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure (no GUI)
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DVCA_BUILD_GUI=OFF
+
+      - name: Build
+        run: cmake --build build -j"$(nproc)"
+
+      - name: Unit, edge-case and scenario tests
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Scenario matrix (3 maps x 2 vehicles x 6 algorithms x 2 models)
+        run: |
+          python3 tests/run_matrix.py build matrix E1
+          python3 - <<'PY'
+          import json, sys
+          runs = [json.loads(l) for l in open("matrix/results.jsonl")]
+          bad = [r for r in runs if not r.get("clean")]
+          for r in bad:
+              print(f"NOT CLEAN: {r['map']} / {r['vehicle']} / {r['algo']} / {r['fidelity']}: {r['outcome']}, max CTE {r['max_cte']:.2f} m")
+          print(f"{len(runs) - len(bad)}/{len(runs)} scenarios clean")
+          sys.exit(1 if bad else 0)
+          PY
+
+      - name: Map path checks
+        run: |
+          python3 tools/smooth_path.py map_01 --check-only
+          python3 tools/generate_map02_path.py --check-only
+          python3 tools/smooth_path.py map_03 --check-only
+
+  gui:
+    name: GUI build
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install GLFW / OpenGL
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libglfw3-dev libgl1-mesa-dev zlib1g-dev
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build -j"$(nproc)"

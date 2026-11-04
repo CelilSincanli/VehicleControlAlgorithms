@@ -11,19 +11,23 @@ LqrFileConfig LoadLqrConfig(const std::string& path) {
     if (!f.is_open()) return cfg;
     std::string src((std::istreambuf_iterator<char>(f)),
                      std::istreambuf_iterator<char>());
-    readFloat(src, "q0",              cfg.q0);
-    readFloat(src, "q1",              cfg.q1);
-    readFloat(src, "q2",              cfg.q2);
-    readFloat(src, "q3",              cfg.q3);
-    readFloat(src, "q4",              cfg.q4);
-    readFloat(src, "r_steering",      cfg.r_steering);
-    readFloat(src, "r_acceleration",  cfg.r_acceleration);
-    readFloat(src, "r_scale",         cfg.r_scale);
-    readFloat(src, "time_step",       cfg.time_step);
-    readFloat(src, "max_speed",       cfg.max_speed);
-    readInt  (src, "dare_iterations", cfg.dare_iterations);
-    readFloat(src, "dare_threshold",  cfg.dare_threshold);
-    readInt  (src, "search_window",   cfg.search_window);
+    // Every value is clamped into the slider range (tuning_limits.hpp); values
+    // that were not numbers or out of range are listed in cfg.warnings.
+    ConfigReader r(src);
+    r.Float("q0",              cfg.q0, tuning::kLQRWeight);
+    r.Float("q1",              cfg.q1, tuning::kLQRWeight);
+    r.Float("q2",              cfg.q2, tuning::kLQRWeight);
+    r.Float("q3",              cfg.q3, tuning::kLQRWeight);
+    r.Float("q4",              cfg.q4, tuning::kLQRWeight);
+    r.Float("q5",              cfg.q5, tuning::kLQRWeight);
+    r.Float("r_steering",      cfg.r_steering, tuning::kLQRWeight);
+    r.Float("r_acceleration",  cfg.r_acceleration, tuning::kLQRWeight);
+    r.Float("r_scale",         cfg.r_scale, tuning::kLQRWeight);
+    r.Float("max_speed",       cfg.max_speed, tuning::kMaxSpeed);
+    r.Int  ("dare_iterations", cfg.dare_iterations, tuning::kLQRDareIterations);
+    r.Float("dare_threshold",  cfg.dare_threshold, tuning::kLQRDareThreshold);
+    r.Int  ("search_window",   cfg.search_window, tuning::kSearchWindow);
+    cfg.warnings = r.warnings();
     cfg.loaded = true;
     return cfg;
 }

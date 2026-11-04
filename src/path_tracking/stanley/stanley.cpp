@@ -11,6 +11,7 @@ Stanley::Stanley(const StanleyConfig& config) : config_(config) {}
 void Stanley::SetPath(const std::vector<Point2D>& waypoints) {
     path_             = waypoints;
     current_path_idx_ = 0;
+    seeded_           = false;
     target_point_     = path_.empty() ? Point2D{} : path_.front();
 }
 
@@ -24,11 +25,14 @@ float Stanley::ComputePathYaw(int index) const {
 
 int Stanley::FindNearestWaypoint(float fx, float fy) const {
     const int n      = static_cast<int>(path_.size());
-    const int end    = std::min(current_path_idx_ + config_.search_window, n);
+    // First call after SetPath(): search the whole path (rebuild mid-run).
+    const int begin  = seeded_ ? current_path_idx_ : 0;
+    const int end    = seeded_ ? std::min(current_path_idx_ + config_.search_window, n) : n;
     float     best   = std::numeric_limits<float>::max();
-    int       result = current_path_idx_;
+    int       result = begin;
+    seeded_ = true;
 
-    for (int i = current_path_idx_; i < end; ++i) {
+    for (int i = begin; i < end; ++i) {
         float dx = path_[i].x - fx;
         float dy = path_[i].y - fy;
         float d2 = dx * dx + dy * dy;

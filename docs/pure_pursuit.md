@@ -148,7 +148,7 @@ Full sequence:
 
 ### `FindClosestWaypoint`
 
-Searches a forward window of 40 waypoints (`kSearchWindow`) starting from the last known closest index. Returns the index of the waypoint with minimum Euclidean distance to the vehicle. The cursor only moves forward — it never backtracks.
+On the first call after `SetPath` (simulation start or a live parameter change) the whole path is searched, so a rebuilt controller continues from the vehicle's real position. After that it searches a forward window of `search_window` waypoints (default 40) starting from the last known closest index. Returns the index of the waypoint with minimum Euclidean distance to the vehicle. The cursor only moves forward — it never backtracks.
 
 ```
 for i in [current_path_idx_, current_path_idx_ + 40):
@@ -160,12 +160,13 @@ current_path_idx_ = index of minimum
 
 ### `FindLookaheadPoint`
 
-Scans forward from `closest` and returns the first waypoint whose distance from the vehicle is `≥ ld`. If the end of the path is reached, returns the last waypoint.
+Walks forward from `closest` to the first segment whose end point is at least `ld` from the rear axle, and returns the point on that segment at **exactly** distance `ld` (circle–segment intersection). The walk stops after `ld + 10 m` of arc length; past the end of the path it returns the last waypoint.
 
 ```
-for i in [closest, path.size()):
-    if distance(path[i], vehicle) ≥ ld:
-        return path[i]
+for each segment (a, b) from closest:
+    if distance(b, vehicle) ≥ ld:
+        return the point p on [a, b] with |p − vehicle| = ld
+    stop after ld + 10 m of arc length
 return path.back()
 ```
 
@@ -205,7 +206,7 @@ Speed 10 m/s →  Ld = 10.0 m  (conservative at high speed)
 **Limitations of the current implementation:**
 
 1. **No heading look-ahead** — Only lateral error is corrected; the approach angle to the path is not directly controlled.
-2. **Discrete waypoint search** — `FindLookaheadPoint` picks an exact waypoint rather than interpolating on the segment, which can cause small discretisation errors.
+2. **Polyline path** — the lookahead point is interpolated on straight segments between waypoints (1 m apart), not on a smooth curve.
 3. **No backward driving** — `FindClosestWaypoint` is monotonically forward; reverse path tracking is not supported.
 4. **No obstacle awareness** — The controller tracks the pre-computed path blindly. Obstacle avoidance must be handled by the path planner upstream.
 
@@ -216,15 +217,15 @@ Speed 10 m/s →  Ld = 10.0 m  (conservative at high speed)
 The Pure Pursuit controller is called once per simulation frame inside `TickSimulation`:
 
 ```cpp
-// vehicle_control_ui.cpp — TickSimulation
-float delta   = pure_pursuit_.ComputeSteering(vehicle_state_);
-float accel   = 1.0f * (max_speed_ - vehicle_state_.speed);
-
-VehicleControls controls{ delta, accel };
-vehicle_state_ = bicycle_model_.Step(vehicle_state_, controls, dt);
+// vehicle_control_ui.cpp — TickSimulation (fixed dt = 1/60 s)
+float delta = simPursuit_->ComputeSteering(simVehicleState_);
+vehicle::VehicleControls ctrl;
+ctrl.steering_angle = delta;
+ctrl.acceleration   = sim::SpeedCommand(simMaxSpeed_, simVehicleState_.speed, simPrevAccel_, vehicle, dt);
+simVehicleState_    = simModel_->Step(simVehicleState_, ctrl, dt);
 ```
 
-The returned steering angle `delta` is passed directly to the bicycle model as the desired front-wheel angle. The model internally clamps it to the vehicle's physical steering limit before integration.
+The returned steering angle `delta` is the commanded front-wheel angle. The vehicle model clamps it to the vehicle's tire-angle limits and, under the Dynamic model, moves the wheel towards it at the actuator's rate.
 
 The look-ahead point retrieved via `GetLookaheadPoint()` is also rendered as a yellow dot connected by a light-blue line from the rear axle, giving visual feedback of what the controller is currently targeting.
 
@@ -259,9 +260,9 @@ All parameters in this file can be adjusted at runtime without recompiling or re
 
 | Slider | Range | Step |
 |--------|-------|------|
-| Lookahead Dist | 0.1 – 10.0 m | 0.1 m |
+| Lookahead Dist | 0.5 – 10.0 m | 0.1 m |
 | Lookahead Gain | 0.1 – 1.0 | 0.1 |
-| Max Speed | 0.1 – 20.0 m/s | 0.1 m/s |
+| Max Speed | 0.5 – 15.0 m/s (Dynamic model: up to the path speed cap) | 0.1 m/s |
 | Search Window | 20 – 80 | 1 |
 
 ---
@@ -279,5 +280,5 @@ Lateral error (body frame):
   e = −Δx·sin(ψ) + Δy·cos(ψ)
   where (Δx, Δy) = look-ahead point − vehicle rear axle
 
-Waypoint search window:  40 waypoints forward from last closest index
+Waypoint search window:  whole path on the first call, then search_window (40) waypoints forward
 ```

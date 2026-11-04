@@ -28,6 +28,7 @@ private:
     std::vector<Point2D> path_;
     mutable Point2D      target_point_{};
     mutable int          current_path_idx_ = 0;
+    mutable bool         seeded_ = false;   // first call searches the whole path
 
     int   FindNearestWaypoint(float fx, float fy) const;
     float ComputePathYaw(int index) const;

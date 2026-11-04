@@ -1,0 +1,413 @@
+<mxfile host="app.diagrams.net" pages="5">
+  <diagram name="1. System Overview (As Built)" id="BMqxS23CoLF9dK-1jMbl">
+    <mxGraphModel dx="2144" dy="628" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="700" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="p1_laneA" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Configuration — data/vehicle/*.json" vertex="1">
+          <mxGeometry height="460" width="410" x="-20" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_a1" parent="p1_laneA" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;arcSize=20;" value="vehicle01.json — Bus 01&#xa;cog_height 1.20, yaw_inertia 47000&#xa;tire{6.0, 0.80}" vertex="1">
+          <mxGeometry height="75" width="180" x="10" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_a2" parent="p1_laneA" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;arcSize=20;" value="vehicle02.json — Car 01&#xa;cog_height 0.65, yaw_inertia 1960&#xa;tire{9.0, 0.95}" vertex="1">
+          <mxGeometry height="75" width="180" x="200" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_a3" parent="p1_laneA" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="VehicleLoader::Load()&#xa;hand-rolled JVal parser — guarded&#xa;has()/at() reads, nested objects supported" vertex="1">
+          <mxGeometry height="65" width="320" x="20" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_a4" parent="p1_laneA" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" value="VehicleData&#xa;20 flat fields + cog_height + yaw_inertia&#xa;+ TireParams/SuspensionParams/SteeringParams" vertex="1">
+          <mxGeometry height="70" width="320" x="20" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_a5" parent="p1_laneA" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontColor=#333333;fontStyle=2;" value="Both vehicles fully populate the new fields —&#xa;see page 4 for the side-by-side comparison" vertex="1">
+          <mxGeometry height="55" width="320" x="20" y="365" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_ea1" edge="1" parent="p1_laneA" source="p1_a1" style="edgeStyle=orthogonalEdgeStyle;" target="p1_a3">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="80" y="130" />
+              <mxPoint x="80" y="130" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p1_ea2" edge="1" parent="p1_laneA" source="p1_a2" style="edgeStyle=orthogonalEdgeStyle;" target="p1_a3">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="295.01" y="170" />
+              <mxPoint x="295.01" y="170" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p1_ea3" edge="1" parent="p1_laneA" source="p1_a3" style="edgeStyle=orthogonalEdgeStyle;" target="p1_a4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_ea4" edge="1" parent="p1_laneA" source="p1_a4" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" target="p1_a5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_laneB" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;" value="Model Construction" vertex="1">
+          <mxGeometry height="460" width="380" x="450" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_b1" parent="p1_laneB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;arcSize=20;" value="VehicleControlUI&#xa;selectedVehicleModelKind_, modelDirty_" vertex="1">
+          <mxGeometry height="55" width="330" x="35" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_b2" parent="p1_laneB" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="RebuildVehicleModel()&#xa;copies loaded VehicleData, overlays live&#xa;Tune*_ structs only where their &quot;enabled&quot;&#xa;checkbox is on" vertex="1">
+          <mxGeometry height="80" width="330" x="35" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_b3" parent="p1_laneB" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" value="VehicleModelFactory::MakeVehicleModel(&#xa;    ModelFidelity fidelity, const VehicleData&amp;)" vertex="1">
+          <mxGeometry height="55" width="330" x="35" y="205" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_b4" parent="p1_laneB" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontStyle=2;" value="enum class ModelFidelity {&#xa;    Kinematic, DynamicLinearTire }" vertex="1">
+          <mxGeometry height="50" width="330" x="35" y="275" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_b5" parent="p1_laneB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;arcSize=20;" value="simModel_ : unique_ptr&lt;IVehicleModel&gt;" vertex="1">
+          <mxGeometry height="45" width="330" x="35" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_eb1" edge="1" parent="p1_laneB" source="p1_b1" style="edgeStyle=orthogonalEdgeStyle;" target="p1_b2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_eb2" edge="1" parent="p1_laneB" source="p1_b2" style="edgeStyle=orthogonalEdgeStyle;" target="p1_b3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_eb3" edge="1" parent="p1_laneB" source="p1_b3" style="edgeStyle=orthogonalEdgeStyle;" target="p1_b4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_eb4" edge="1" parent="p1_laneB" source="p1_b4" style="edgeStyle=orthogonalEdgeStyle;" target="p1_b5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_laneC" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;" value="Simulation Loop — TickSimulation(dt)" vertex="1">
+          <mxGeometry height="460" width="370" x="890" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_c1" parent="p1_laneC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;arcSize=20;" value="if (modelDirty_)  RebuildVehicleModel();&#xa;if (paramsDirty_) RebuildAlgorithm();" vertex="1">
+          <mxGeometry height="55" width="320" x="20" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_c2" parent="p1_laneC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" value="simVehicleState_ = simModel_-&gt;Step(&#xa;    simVehicleState_, ctrl, dt)" vertex="1">
+          <mxGeometry height="55" width="320" x="20" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_c3" parent="p1_laneC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="IPathTrackingAlgorithm::ComputeSteering(state)&#xa;→ δ  (Pure Pursuit / Adaptive PP / LQR /&#xa;   Stanley / MPC / MPPI — unchanged)" vertex="1">
+          <mxGeometry height="70" width="320" x="20" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_c4" parent="p1_laneC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontColor=#333333;fontStyle=2;" value="Every controller consumes the exact same&#xa;VehicleState regardless of which model&#xa;fidelity produced it — no controller changes&#xa;were needed to add the new fidelity" vertex="1">
+          <mxGeometry height="80" width="320" x="20" y="265" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_ec1" edge="1" parent="p1_laneC" source="p1_c1" style="edgeStyle=orthogonalEdgeStyle;" target="p1_c2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_ec2" edge="1" parent="p1_laneC" source="p1_c2" style="edgeStyle=orthogonalEdgeStyle;" target="p1_c3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_ec3" edge="1" parent="p1_laneC" source="p1_c3" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" target="p1_c4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_ecloop" edge="1" parent="p1_laneC" source="p1_c4" style="edgeStyle=orthogonalEdgeStyle;dashed=1;strokeColor=#82b366;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="p1_c1" value="next frame">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="400" y="305" />
+              <mxPoint x="400" y="67.52" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p1_x1" edge="1" parent="1" source="p1_a4" style="edgeStyle=orthogonalEdgeStyle;dashed=1;strokeColor=#6c8ebf;" target="p1_b2" value="VehicleData vd">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="430" y="315" />
+              <mxPoint x="430" y="160" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p1_x2" edge="1" parent="1" source="p1_b5" style="edgeStyle=orthogonalEdgeStyle;dashed=1;strokeColor=#82b366;" target="p1_c2" value="IVehicleModel&amp;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="860" y="372.52" />
+              <mxPoint x="860" y="147.52" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p1_legend" parent="1" style="swimlane;fontStyle=1;align=center;startSize=25;fillColor=#ffffff;strokeColor=#333333;" value="Legend" vertex="1">
+          <mxGeometry height="80" width="260" x="-20" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_l1" parent="p1_legend" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" value="Configuration / data" vertex="1">
+          <mxGeometry height="20" width="240" x="10" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_l2" parent="p1_legend" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="Active code path" vertex="1">
+          <mxGeometry height="20" width="240" x="10" y="35" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="2. IVehicleModel Hierarchy and Factory" id="54pc_SzcB4AVruhoTSSn">
+    <mxGraphModel dx="793" dy="527" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="980" pageHeight="620" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="p2_iface" parent="1" style="rounded=0;dashed=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontStyle=1;align=left;spacingLeft=8;" value="«interface» IVehicleModel&#xa;VehicleState Step(state, controls, dt)   [non-const]" vertex="1">
+          <mxGeometry height="55" width="580" x="360" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_factory" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;align=left;spacingLeft=8;" value="VehicleModelFactory::MakeVehicleModel(fidelity, data)&#xa;— the ONLY place a concrete class below is named —&#xa;switch(fidelity) { Kinematic → ...; DynamicLinearTire → ...; }" vertex="1">
+          <mxGeometry height="70" width="580" x="30" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_kin" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;spacingLeft=8;" value="KinematicBicycleModel&#xa;Rear-axle kinematics, no lateral tire slip.&#xa;Equations unchanged since before this work —&#xa;only gained IVehicleModel conformance (Step()&#xa;lost const, gained override).&#xa;&#xa;ACTIVE — ModelFidelity::Kinematic&#xa;(the default fidelity)" vertex="1">
+          <mxGeometry height="180" width="330" x="40" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_composed" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;align=left;spacingLeft=8;" value="ComposedVehicleModel&#xa;Composition root — 5 swappable subsystems&#xa;(tire × 2, suspension, drivetrain, aero, steering).&#xa;Full detail on page 3.&#xa;&#xa;ACTIVE — ModelFidelity::DynamicLinearTire" vertex="1">
+          <mxGeometry height="180" width="330" x="410" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_e1" edge="1" parent="1" source="p2_iface" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" target="p2_factory" value="used through">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_e2" edge="1" parent="1" source="p2_factory" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;" target="p2_kin" value="Kinematic">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_e3" edge="1" parent="1" source="p2_factory" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;" target="p2_composed" value="DynamicLinearTire">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_e4" edge="1" parent="1" source="p2_kin" style="edgeStyle=orthogonalEdgeStyle;dashed=1;endArrow=block;endFill=0;" target="p2_iface" value="implements">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="205" y="210" />
+              <mxPoint x="650" y="210" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p2_e5" edge="1" parent="1" source="p2_composed" style="edgeStyle=orthogonalEdgeStyle;dashed=1;endArrow=block;endFill=0;" target="p2_iface" value="implements">
+          <mxGeometry relative="1" x="-0.0007" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="574.99" y="209.99" />
+              <mxPoint x="650" y="209.99" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="3. ComposedVehicleModel — Composition and Step Flow" id="EEOG71_orkFhln57vClL">
+    <mxGraphModel dx="793" dy="527" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1520" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="p3_laneSeq" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;" value="ComposedVehicleModel::Step() — Sequence" vertex="1">
+          <mxGeometry height="860" width="490" x="10" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_s1" parent="p3_laneSeq" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;arcSize=20;" value="Step(state, controls, dt)" vertex="1">
+          <mxGeometry height="50" width="420" x="20" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_s2" parent="p3_laneSeq" style="rhombus;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="s.speed &lt; kMinVx (0.5 m/s)?" vertex="1">
+          <mxGeometry height="45" width="190" y="157.5" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_s3" parent="p3_laneSeq" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="NO → UpdateSteering(u.steering_angle, dt)&#xa;applied_steering_ = steering-&gt;ComputeAppliedAngle(&#xa;    commanded, applied_steering_, dt)" vertex="1">
+          <mxGeometry height="65" width="420" x="20" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_s4" parent="p3_laneSeq" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="UpdateAxleLoads(last_ax_, s.speed)&#xa;suspension-&gt;ComputeAxleLoads(ax_prev, vx)&#xa;— uses PREVIOUS step&#39;s ax, avoids an&#xa;ax/Fz algebraic loop within one step" vertex="1">
+          <mxGeometry height="75" width="420" x="20" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_s5" parent="p3_laneSeq" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="ComputeTireForces(delta, s, loads)&#xa;tire_front/tire_rear-&gt;ComputeLateralForce(alpha, fz)" vertex="1">
+          <mxGeometry height="65" width="420" x="20" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_s6" parent="p3_laneSeq" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="ComputeDrivetrainForce(u.acceleration, vx)&#xa;ComputeAeroForce(vx)" vertex="1">
+          <mxGeometry height="55" width="420" x="20" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_s7" parent="p3_laneSeq" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="IntegrateDynamics(s, fx_drive+fx_aero, dt)&#xa;Euler-integrates vx, vy, r, heading, x, y&#xa;using fy_front_/fy_rear_/Iz_" vertex="1">
+          <mxGeometry height="65" width="420" x="20" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_s8" parent="p3_laneSeq" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;arcSize=20;" value="last_ax_ = (next.speed − s.speed) / dt&#xa;return next" vertex="1">
+          <mxGeometry height="55" width="420" x="20" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_es1" edge="1" parent="p3_laneSeq" source="p3_s1" style="edgeStyle=orthogonalEdgeStyle;" target="p3_s2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_es2n" edge="1" parent="p3_laneSeq" source="p3_s2" style="edgeStyle=orthogonalEdgeStyle;" target="p3_s3" value="NO">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_es3" edge="1" parent="p3_laneSeq" source="p3_s3" style="edgeStyle=orthogonalEdgeStyle;" target="p3_s4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_es4" edge="1" parent="p3_laneSeq" source="p3_s4" style="edgeStyle=orthogonalEdgeStyle;" target="p3_s5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_es5" edge="1" parent="p3_laneSeq" source="p3_s5" style="edgeStyle=orthogonalEdgeStyle;" target="p3_s6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_es6" edge="1" parent="p3_laneSeq" source="p3_s6" style="edgeStyle=orthogonalEdgeStyle;" target="p3_s7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_es7" edge="1" parent="p3_laneSeq" source="p3_s7" style="edgeStyle=orthogonalEdgeStyle;" target="p3_s8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_s2b" parent="p3_laneSeq" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontColor=#333333;fontStyle=2;" value="YES → KinematicFallback()&#xa;constructs a local KinematicBicycleModel(data_)&#xa;and delegates Step() to it — legal even though&#xa;Step() is non-const: constness applies to&#xa;*this*, not to an unrelated local object." vertex="1">
+          <mxGeometry height="120" width="260" x="230" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_es2y" edge="1" parent="p3_laneSeq" source="p3_s2" style="edgeStyle=orthogonalEdgeStyle;" target="p3_s2b" value="YES">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_laneSub" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;" value="Subsystems struct — one unique_ptr&lt;Ixxx&gt; per concern" vertex="1">
+          <mxGeometry height="530" width="1010" x="500" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_tire" parent="p3_laneSub" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;spacingLeft=6;" value="ITireModel  tire_front, tire_rear&#xa;→ LinearTireModel&#xa;Fy = clamp(coeff·Fz·α, ±μ·Fz)&#xa;coeff = TireParams::cornering_stiffness_coeff&#xa;μ = TireParams::friction_coefficient" vertex="1">
+          <mxGeometry height="110" width="460" x="30" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_susp" parent="p3_laneSub" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;spacingLeft=6;" value="ISuspensionModel  suspension&#xa;→ RigidSuspensionModel&#xa;Fz_front = m·g·b/L − m·ax·h/L&#xa;Fz_rear  = m·g·a/L + m·ax·h/L&#xa;h = VehicleData::cog_height (0 ⇒ static split)" vertex="1">
+          <mxGeometry height="110" width="460" x="510" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_drive" parent="p3_laneSub" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;spacingLeft=6;" value="IDrivetrainModel  drivetrain&#xa;→ DirectAccelDrivetrainModel&#xa;Fx = mass · u_a&#xa;(bit-for-bit regression anchor vs. pre-refactor)" vertex="1">
+          <mxGeometry height="90" width="460" x="30" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_aero" parent="p3_laneSub" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;spacingLeft=6;" value="IAeroModel  aero&#xa;→ SimpleAeroModel&#xa;Fx = −mass · CA · vx·|vx|&#xa;(bit-for-bit regression anchor vs. pre-refactor)" vertex="1">
+          <mxGeometry height="90" width="460" x="510" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_steer" parent="p3_laneSub" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;spacingLeft=6;" value="ISteeringModel  steering&#xa;→ InstantaneousSteeringModel (default) or&#xa;   RateLimitedSteeringModel (steering.use_rate_limit)&#xa;Rate-limited: delta_max = max_rate · dt&#xa;— activates VehicleData::max_steering_wheel_rate,&#xa;  parsed since day one but unused until this work" vertex="1">
+          <mxGeometry height="120" width="940" x="30" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_iz" parent="p3_laneSub" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontStyle=2;align=left;spacingLeft=6;" value="Iz_ (yaw inertia, set once in the constructor):&#xa;VehicleData::yaw_inertia if &gt; 0 (JSON override), else&#xa;the mass·a·b two-point-mass estimate" vertex="1">
+          <mxGeometry height="70" width="940" x="30" y="420" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="4. Data Model — VehicleData and VehicleState" id="yj17jhHzIxI1D7yXcc0w">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="1500" pageHeight="660" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="p4_lane1" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="VehicleData (global-scope struct)" vertex="1">
+          <mxGeometry height="560" width="480" x="10" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="p4_d1" parent="p4_lane1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;spacingLeft=6;" value="Dynamics&#xa;mass, a, b, CA,&#xa;cog_height  [m]  — NEW&#xa;yaw_inertia [kg·m²]  — NEW" vertex="1">
+          <mxGeometry height="90" width="440" x="20" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p4_d2" parent="p4_lane1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;spacingLeft=6;" value="Steering limits (unchanged)&#xa;minimum_turning_radius, max/min_steering_wheel_angle,&#xa;max_steering_wheel_rate, steering_wheel_to_tire_angle_ratio" vertex="1">
+          <mxGeometry height="70" width="440" x="20" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="p4_d3" parent="p4_lane1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;spacingLeft=6;" value="Geometry (unchanged)&#xa;wheelbase, wheel_radius/width/tread,&#xa;front/rear/left/right_overhang, vehicle_height" vertex="1">
+          <mxGeometry height="70" width="440" x="20" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="p4_d4" parent="p4_lane1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;spacingLeft=6;" value="vehicle::TireParams tire&#xa;{ enabled, cornering_stiffness_coeff=6.0,&#xa;  friction_coefficient=1.0 }" vertex="1">
+          <mxGeometry height="60" width="440" x="20" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="p4_d5" parent="p4_lane1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;spacingLeft=6;" value="vehicle::SuspensionParams suspension&#xa;{ enabled }  — gate for cog_height" vertex="1">
+          <mxGeometry height="50" width="440" x="20" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="p4_d7" parent="p4_lane1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;spacingLeft=6;" value="vehicle::SteeringParams steering&#xa;{ enabled, use_rate_limit }" vertex="1">
+          <mxGeometry height="50" width="440" x="20" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="p4_d8" parent="p4_lane1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;spacingLeft=6;" value="bool loaded" vertex="1">
+          <mxGeometry height="40" width="440" x="20" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="p4_lane2" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="VehicleState / VehicleControls" vertex="1">
+          <mxGeometry height="180" width="460" x="510" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="p4_s1" parent="p4_lane2" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;spacingLeft=6;" value="VehicleState&#xa;x, y, heading, speed, lateral_speed, yaw_rate" vertex="1">
+          <mxGeometry height="55" width="420" x="20" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p4_s3" parent="p4_lane2" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;spacingLeft=6;" value="VehicleControls&#xa;steering_angle, acceleration" vertex="1">
+          <mxGeometry height="55" width="420" x="20" y="105" as="geometry" />
+        </mxCell>
+        <mxCell id="p4_lane3" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;" value="Current per-vehicle JSON values" vertex="1">
+          <mxGeometry height="710" width="480" x="1000" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="p4_bus" parent="p4_lane3" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;align=left;spacingLeft=6;" value="Bus 01 — vehicle01.json&#xa;mass 8300 kg · wheelbase 4.335 m&#xa;cog_height:  1.20 m&#xa;yaw_inertia: 47000 kg·m²&#xa;tire.cornering_stiffness_coeff: 6.0&#xa;tire.friction_coefficient:      0.80&#xa;suspension.enabled:    true&#xa;steering.use_rate_limit: true" vertex="1">
+          <mxGeometry height="180" width="440" x="20" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p4_car" parent="p4_lane3" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;align=left;spacingLeft=6;" value="Car 01 — vehicle02.json&#xa;mass 1500 kg · wheelbase 2.6 m&#xa;cog_height:  0.65 m&#xa;yaw_inertia: 1960 kg·m²&#xa;tire.cornering_stiffness_coeff: 9.0&#xa;tire.friction_coefficient:      0.95&#xa;suspension.enabled:    true&#xa;steering.use_rate_limit: true" vertex="1">
+          <mxGeometry height="180" width="440" x="20" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="p4_note" parent="p4_lane3" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontColor=#333333;fontStyle=2;align=left;spacingLeft=6;" value="Both sets of values are documented engineering&#xa;estimates, not measured OEM data — see&#xa;README.md &quot;Adding a New Vehicle&quot; section for the&#xa;exact formulas (cog_height ≈ k_h·vehicle_height,&#xa;yaw_inertia = mass·k², k ≈ fraction of wheelbase).&#xa;&#xa;Car&#39;s tire coefficient (9.0) is higher than the&#xa;bus&#39;s (6.0) — passenger radial tires run stiffer/&#xa;grippier per unit load than heavy-duty truck tires." vertex="1">
+          <mxGeometry height="180" width="440" x="20" y="440" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="5. UI Integration, Live Tuning and Tests" id="wsm9FvtS8yfOVgYpTkCL">
+    <mxGraphModel dx="944" dy="628" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="700" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="p5_lane1" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;" value="Vehicle Model Picker (Simulation Screen)" vertex="1">
+          <mxGeometry height="650" width="470" x="10" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_p1" parent="p5_lane1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;arcSize=20;" value="RenderVehicleModelTuning()&#xa;&quot;Model: &lt;kind&gt;&quot; button" vertex="1">
+          <mxGeometry height="55" width="430" x="20" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_p2" parent="p5_lane1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Popup — explicitly centered on the viewport&#xa;(SetNextWindowPos + GetMainViewport()-&gt;GetCenter())&#xa;list: &quot;Kinematic&quot;, &quot;Dynamic (Linear Tire)&quot;" vertex="1">
+          <mxGeometry height="70" width="430" x="20" y="115" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_p3" parent="p5_lane1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" value="On select: selectedVehicleModelKind_ = name;&#xa;modelDirty_ = true;&#xa;— NOT ResetSimulation(): swap applies live,&#xa;mid-run, without resetting the trace" vertex="1">
+          <mxGeometry height="75" width="430" x="20" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_p4" parent="p5_lane1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontStyle=2;align=left;spacingLeft=6;" value="Why safe both directions:&#xa;Kinematic always writes lateral_speed=0 and a&#xa;kinematic yaw_rate estimate every step, so handing&#xa;those to a freshly-swapped dynamic model is the&#xa;physically correct initial condition. Dynamic→&#xa;Kinematic: KinematicBicycleModel never reads&#xa;lateral_speed and only overwrites yaw_rate, so&#xa;stale dynamic state is simply inert next step." vertex="1">
+          <mxGeometry height="140" width="430" x="20" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_p5" parent="p5_lane1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;align=left;spacingLeft=6;" value="Layout fix: both this panel&#39;s subsystem sliders&#xa;AND the algorithm Parameter-Tuning panel below it&#xa;are each wrapped in their own bounded/scrollable&#xa;ImGui::BeginChild region — content scrolls instead&#xa;of bleeding into the sibling panel (bug found and&#xa;fixed during manual testing)." vertex="1">
+          <mxGeometry height="110" width="430" x="20" y="445" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_lane2" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;" value="Live Tuning Structs → Sliders" vertex="1">
+          <mxGeometry height="650" width="470" x="500" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_t1" parent="p5_lane2" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;spacingLeft=6;" value="TuneTire { enabled, cornering_stiffness_coeff }&#xa;→ &quot;Override Tire Defaults&quot; checkbox +&#xa;   &quot;Cornering Stiffness&quot; slider (2.0–12.0)" vertex="1">
+          <mxGeometry height="70" width="260" x="20" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_t2" parent="p5_lane2" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;spacingLeft=6;" value="TuneSuspension { enabled, cog_height }&#xa;→ &quot;Override Suspension Defaults&quot; checkbox +&#xa;   &quot;CoG Height&quot; slider (0.2–2.5 m)" vertex="1">
+          <mxGeometry height="70" width="260" x="20" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_t3" parent="p5_lane2" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;spacingLeft=6;" value="TuneSteering { enabled, use_rate_limit,&#xa;               max_steering_wheel_rate }&#xa;→ &quot;Override Steering Defaults&quot; checkbox +&#xa;   &quot;Rate-Limited Steering&quot; checkbox +&#xa;   &quot;Max Steering Rate&quot; slider (20–500 deg/s)" vertex="1">
+          <mxGeometry height="95" width="260" x="20" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_t4" parent="p5_lane2" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" value="RebuildVehicleModel()&#xa;copies VehicleData, overlays each Tune*_ struct&#xa;only when its own &quot;enabled&quot; flag is on, then&#xa;calls MakeVehicleModel(fidelity, vd)" vertex="1">
+          <mxGeometry height="75" width="430" x="20" y="315" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_t5" parent="p5_lane2" style="rounded=0;dashed=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontColor=#666666;align=left;spacingLeft=6;" value="tire.friction_coefficient is JSON-configurable&#xa;(see page 4) but NOT exposed as a live slider here&#xa;— flagged, deliberately out of scope so far." vertex="1">
+          <mxGeometry height="65" width="430" x="20" y="405" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_et1" edge="1" parent="p5_lane2" source="p5_t1" style="edgeStyle=orthogonalEdgeStyle;exitX=0.999;exitY=0.479;exitDx=0;exitDy=0;exitPerimeter=0;" target="p5_t4">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="380" y="73.5" />
+            </Array>
+            <mxPoint x="150" y="110" as="sourcePoint" />
+            <mxPoint x="150" y="315" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p5_et2" edge="1" parent="p5_lane2" source="p5_t2" style="edgeStyle=orthogonalEdgeStyle;" target="p5_t4">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="340" y="155" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p5_et3" edge="1" parent="p5_lane2" source="p5_t3" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.421;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.651;entryY=-0.002;entryDx=0;entryDy=0;entryPerimeter=0;" target="p5_t4">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="299.9" y="240" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p5_lane3" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="tests/vehicle_model_tests.cpp — 14 checks, 0 deps" vertex="1">
+          <mxGeometry height="650" width="490" x="990" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_test1" parent="p5_lane3" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;spacingLeft=6;" value="Kinematic regression (4 checks)&#xa;heading/y stay exactly 0 with zero steering;&#xa;x/speed advance under positive acceleration" vertex="1">
+          <mxGeometry height="65" width="450" x="20" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_test2" parent="p5_lane3" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;spacingLeft=6;" value="Factory equivalence (1 check)&#xa;MakeVehicleModel(Kinematic) matches direct&#xa;KinematicBicycleModel bit-for-bit, 50 steps" vertex="1">
+          <mxGeometry height="65" width="450" x="20" y="115" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_test3" parent="p5_lane3" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;spacingLeft=6;" value="LinearTireModel (2 checks)&#xa;unsaturated Fy=C·α; friction-circle clamp engages" vertex="1">
+          <mxGeometry height="55" width="450" x="20" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_test4" parent="p5_lane3" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;spacingLeft=6;" value="SimpleAeroModel (2 checks)&#xa;forward drag; reverse-motion sign flip" vertex="1">
+          <mxGeometry height="55" width="450" x="20" y="255" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_test5" parent="p5_lane3" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;spacingLeft=6;" value="DirectAccelDrivetrainModel (2 checks)&#xa;Car 01 / Bus 01 mass cases" vertex="1">
+          <mxGeometry height="55" width="450" x="20" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_test6" parent="p5_lane3" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;spacingLeft=6;" value="RateLimitedSteeringModel (1 check)&#xa;ramp-up, settle, and reversal all clamp correctly" vertex="1">
+          <mxGeometry height="55" width="450" x="20" y="385" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_test7" parent="p5_lane3" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;spacingLeft=6;" value="YawInertiaOverride (2 checks)&#xa;explicit yaw_inertia == mass·a·b reproduces the&#xa;fallback bit-for-bit; a different value measurably&#xa;changes the yaw-rate response" vertex="1">
+          <mxGeometry height="75" width="450" x="20" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="p5_test8" parent="p5_lane3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;arcSize=20;" value="Run: ./vehicle_model_tests  (exit 0/1)&#xa;or  ctest -R vehicle_model_tests --output-on-failure&#xa;No ImGui/ImPlot/GLFW/OpenGL — headless-CI safe" vertex="1">
+          <mxGeometry height="70" width="450" x="20" y="545" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

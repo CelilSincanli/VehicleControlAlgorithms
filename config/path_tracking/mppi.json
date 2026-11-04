@@ -1,9 +1,9 @@
 {
-    "horizon_T": 15,
+    "horizon_T": 20,
     "num_samples_K": 128,
     "lambda": 1.0,
-    "sigma_steer": 0.3,
-    "rollout_dt": 0.1,
+    "sigma_steer": 0.2,
+    "rollout_dt": 0.15,
     "max_speed": 5.0,
     "w_lat":         1.0,
     "w_heading":     0.5,
