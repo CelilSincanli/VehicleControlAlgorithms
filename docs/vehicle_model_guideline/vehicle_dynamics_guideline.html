@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vehicle Dynamics Model — Current Architecture</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-alt: #f6f8fa;
+    --text: #1b1f24;
+    --text-muted: #57606a;
+    --border: #d0d7de;
+    --accent: #205493;
+    --accent-soft: #dae8fc;
+    --accent-soft-border: #6c8ebf;
+    --green: #2e7d32;
+    --green-soft: #d5e8d4;
+    --green-soft-border: #82b366;
+    --warn: #b85450;
+    --warn-soft: #f8cecc;
+    --gray-soft: #f0f0f0;
+    --gray-soft-border: #999999;
+    --code-bg: #f6f8fa;
+    --link: #0969da;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1117;
+      --bg-alt: #161b22;
+      --text: #e6edf3;
+      --text-muted: #9198a1;
+      --border: #30363d;
+      --accent: #6ea8fe;
+      --accent-soft: #142c4c;
+      --accent-soft-border: #3b6ea5;
+      --green: #7ee787;
+      --green-soft: #10261a;
+      --green-soft-border: #4a7856;
+      --warn: #ffb4a9;
+      --warn-soft: #3d1f1e;
+      --gray-soft: #1c2128;
+      --gray-soft-border: #545d68;
+      --code-bg: #161b22;
+      --link: #6ea8fe;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+  }
+  .layout { display: flex; min-height: 100vh; }
+  nav.toc {
+    width: 280px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 24px 16px;
+    border-right: 1px solid var(--border);
+    background: var(--bg-alt);
+  }
+  nav.toc h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin: 0 0 12px; }
+  nav.toc ol { list-style: none; margin: 0; padding: 0; counter-reset: sect; }
+  nav.toc > ol > li { counter-increment: sect; margin-bottom: 4px; }
+  nav.toc a { color: var(--text); text-decoration: none; font-size: 14px; display: block; padding: 4px 6px; border-radius: 6px; }
+  nav.toc a:hover { background: var(--accent-soft); color: var(--accent); }
+  nav.toc ul { list-style: none; margin: 2px 0 6px 14px; padding: 0; border-left: 1px solid var(--border); }
+  nav.toc ul a { font-size: 12.5px; color: var(--text-muted); padding: 2px 8px; }
+  main { flex: 1; min-width: 0; padding: 40px 56px 120px; max-width: 980px; }
+  h1 { font-size: 30px; margin-bottom: 4px; }
+  .subtitle { color: var(--text-muted); font-size: 15px; margin-top: 0; margin-bottom: 28px; }
+  h2 { font-size: 22px; margin-top: 52px; padding-top: 12px; border-top: 1px solid var(--border); scroll-margin-top: 20px; }
+  h2:first-of-type { border-top: none; }
+  h3 { font-size: 17px; margin-top: 30px; color: var(--accent); scroll-margin-top: 20px; }
+  h4 { font-size: 14.5px; margin-top: 22px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); }
+  p { margin: 12px 0; }
+  a { color: var(--link); }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.9em; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; border: 1px solid var(--border); }
+  pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-size: 13px; }
+  pre code { background: none; border: none; padding: 0; }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 13.5px; }
+  th, td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--bg-alt); font-weight: 600; }
+  tr:nth-child(even) td { background: color-mix(in srgb, var(--bg-alt) 45%, transparent); }
+  .callout { border-radius: 8px; padding: 14px 16px; margin: 18px 0; border: 1px solid; font-size: 14px; }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout.info { background: var(--accent-soft); border-color: var(--accent-soft-border); }
+  .callout.dead { background: var(--gray-soft); border-color: var(--gray-soft-border); color: var(--text-muted); }
+  .callout.done { background: var(--green-soft); border-color: var(--green-soft-border); }
+  .callout strong.tag { display: inline-block; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; margin-left: 6px; vertical-align: middle; }
+  .badge.active { background: var(--green-soft); color: var(--green); border: 1px solid var(--green-soft-border); }
+  .badge.data { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent-soft-border); }
+  .badge.dead { background: var(--gray-soft); color: var(--text-muted); border: 1px solid var(--gray-soft-border); }
+  .box-card { border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; margin: 18px 0; background: var(--bg-alt); }
+  .box-card.active { border-color: var(--green-soft-border); }
+  .box-card.dead { border-color: var(--gray-soft-border); opacity: 0.85; }
+  .box-card h4 { margin-top: 0; text-transform: none; letter-spacing: 0; font-size: 17px; color: var(--text); }
+  .box-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .diagram-link { display: inline-block; margin: 6px 0 18px; font-size: 13.5px; padding: 6px 12px; border: 1px solid var(--accent-soft-border); background: var(--accent-soft); border-radius: 6px; color: var(--accent); text-decoration: none; }
+  .ref-list { font-size: 13.5px; }
+  .ref-list li { margin-bottom: 10px; }
+  footer { border-top: 1px solid var(--border); margin-top: 60px; padding-top: 20px; color: var(--text-muted); font-size: 12.5px; }
+  @media (max-width: 900px) {
+    .layout { flex-direction: column; }
+    nav.toc { position: static; width: auto; height: auto; }
+    main { padding: 24px; max-width: none; }
+    .box-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#purpose">Purpose &amp; How to Read This</a></li>
+    <li><a href="#glance">Architecture at a Glance</a></li>
+    <li><a href="#hierarchy">IVehicleModel &amp; the Two Active Models</a></li>
+    <li><a href="#composed">ComposedVehicleModel Deep Dive</a>
+      <ul>
+        <li><a href="#subsystems">The Five Subsystems</a></li>
+        <li><a href="#step-flow">Step() Sequence</a></li>
+      </ul>
+    </li>
+    <li><a href="#data-model">Data Model</a>
+      <ul>
+        <li><a href="#vehicle-values">Bus 01 vs. Car 01 — Current Values</a></li>
+      </ul>
+    </li>
+    <li><a href="#ui">UI Integration &amp; Live Tuning</a></li>
+    <li><a href="#tests">Test Suite</a></li>
+    <li><a href="#file-map">File Map</a></li>
+    <li><a href="#not-done">What's Not Implemented Yet</a></li>
+    <li><a href="#references">References</a></li>
+  </ol>
+</nav>
+
+<main>
+  <h1>Vehicle Dynamics Model — Current Architecture</h1>
+  <p class="subtitle">VehicleControlAlgorithms · what's actually built and running today: <code>IVehicleModel</code>, <code>ComposedVehicleModel</code>, five swappable subsystems, live UI wiring, and a test suite (14 vehicle unit checks plus edge-case and closed-loop scenario tests, see <code>tests/</code>).</p>
+
+  <section id="purpose">
+    <h2>Purpose &amp; How to Read This</h2>
+    <p>This document was originally a proposal for a layered vehicle model architecture. That proposal has since been <strong>implemented</strong> — this revision describes the system as it exists in the codebase right now, with detailed box diagrams of the actual classes, data flow, and files. It is no longer a "before/after" comparison; the layered architecture <em>is</em> the current architecture.</p>
+    <div class="callout info">
+      <strong class="tag">Companion diagram</strong>
+      Open <code>vehicle_dynamics_architecture.drawio</code> (same folder) alongside this document — 5 pages, each referenced from the matching section below: System Overview, <code>IVehicleModel</code> Hierarchy, <code>ComposedVehicleModel</code> Composition, Data Model, and UI/Tests.
+    </div>
+    <p>Badges used throughout: <span class="badge active">active</span> code that runs today, <span class="badge data">data</span> configuration/JSON.</p>
+    <div class="callout done">
+      <strong class="tag">Code cleanup</strong>
+      A subsequent pass removed every piece of code confirmed to have zero callers anywhere in the codebase — <code>DynamicBicycleModel</code>, <code>IControlOverlay</code>, <code>VehicleDebugInfo</code>/<code>DebugInfo()</code>/<code>MaxStableDt()</code>/<code>Name()</code>, <code>DrivetrainParams</code>/<code>AeroParams</code>, <code>WheelState</code>, and an unused <code>Lerp()</code> helper. This document describes what's left: the actual, exercised architecture, with no unused scaffolding. See <code>IMPLEMENTATION_STATUS.md</code> for the full history.
+    </div>
+  </section>
+
+  <section id="glance">
+    <h2>Architecture at a Glance</h2>
+    <a class="diagram-link" href="vehicle_dynamics_architecture.drawio">→ See diagram page 1 — "System Overview (As Built)"</a>
+    <p>End-to-end flow, exactly as it runs:</p>
+    <pre><code>data/vehicle/*.json
+    │  VehicleLoader::Load()  (guarded JVal parser)
+    ▼
+VehicleData  (mass, a, b, cog_height, yaw_inertia, TireParams, SuspensionParams, ...)
+    │
+    ▼
+VehicleControlUI::RebuildVehicleModel()
+    │  overlays live Tune*_ structs where "enabled", then:
+    ▼
+VehicleModelFactory::MakeVehicleModel(ModelFidelity fidelity, const VehicleData&)
+    │
+    ├─▶ ModelFidelity::Kinematic          → KinematicBicycleModel
+    └─▶ ModelFidelity::DynamicLinearTire  → ComposedVehicleModel (5 subsystems)
+    │
+    ▼
+simModel_ : unique_ptr&lt;IVehicleModel&gt;
+    │  TickSimulation(dt): simModel_-&gt;Step(simVehicleState_, ctrl, dt)
+    ▼
+VehicleState  →  consumed identically by all 6 path-tracking algorithms</code></pre>
+    <p>The key property this achieves: <strong>every path-tracking algorithm (Pure Pursuit, Adaptive Pure Pursuit, LQR, Stanley, MPC, MPPI) works unmodified against either model fidelity</strong> — none of them were touched to add the new fidelity, because they all depend only on the shared <code>VehicleState</code>/<code>VehicleControls</code> types, never on a concrete model class.</p>
+  </section>
+
+  <section id="hierarchy">
+    <h2>IVehicleModel &amp; the Two Active Models</h2>
+    <a class="diagram-link" href="vehicle_dynamics_architecture.drawio">→ See diagram page 2 — "IVehicleModel Hierarchy and Factory"</a>
+    <pre><code>class IVehicleModel {
+public:
+    virtual ~IVehicleModel() = default;
+    virtual VehicleState Step(const VehicleState&amp; state,
+                              const VehicleControls&amp; controls, float dt) = 0;  // non-const
+};</code></pre>
+    <p>Mirrors <code>path_tracking::IPathTrackingAlgorithm</code> deliberately — the same pattern that lets 6 controllers plug in polymorphically now does the same for vehicle models. Deliberately minimal: earlier revisions also declared <code>MaxStableDt()</code>, <code>DebugInfo()</code>, and <code>Name()</code>, but none had any caller anywhere in the codebase, so all three were removed along with the now-dead <code>DynamicBicycleModel</code> class that also implemented them.</p>
+
+    <div class="box-grid">
+      <div class="box-card active">
+        <h4>KinematicBicycleModel <span class="badge active">active — default</span></h4>
+        <p>Rear-axle kinematics, no lateral tire slip. Equations byte-for-byte unchanged from before this work — it only gained <code>IVehicleModel</code> conformance (<code>Step()</code> lost <code>const</code>, gained <code>override</code>).</p>
+      </div>
+      <div class="box-card active">
+        <h4>ComposedVehicleModel <span class="badge active">active</span></h4>
+        <p>Composition root — 5 swappable subsystems (2× tire, suspension, drivetrain, aero, steering). Selected via <code>ModelFidelity::DynamicLinearTire</code>. Full detail below.</p>
+      </div>
+    </div>
+    <pre><code>enum class ModelFidelity { Kinematic, DynamicLinearTire };
+// DynamicPacejkaTire/FullChassis intentionally NOT added yet —
+// an enum value with no factory case is a worse trap than not having it.
+
+std::unique_ptr&lt;IVehicleModel&gt; MakeVehicleModel(ModelFidelity fidelity, const VehicleData&amp; data);
+// The ONLY place a concrete subsystem class is named (Dependency Inversion anchor).</code></pre>
+  </section>
+
+  <section id="composed">
+    <h2>ComposedVehicleModel Deep Dive</h2>
+    <a class="diagram-link" href="vehicle_dynamics_architecture.drawio">→ See diagram page 3 — "ComposedVehicleModel — Composition and Step Flow"</a>
+
+    <h3 id="subsystems">The Five Subsystems</h3>
+    <pre><code>struct Subsystems {
+    std::unique_ptr&lt;ITireModel&gt;       tire_front;
+    std::unique_ptr&lt;ITireModel&gt;       tire_rear;
+    std::unique_ptr&lt;ISuspensionModel&gt; suspension;
+    std::unique_ptr&lt;IDrivetrainModel&gt; drivetrain;
+    std::unique_ptr&lt;IAeroModel&gt;       aero;
+    std::unique_ptr&lt;ISteeringModel&gt;   steering;
+};</code></pre>
+
+    <div class="box-grid">
+      <div class="box-card active">
+        <h4>ITireModel <span class="badge active">LinearTireModel</span></h4>
+        <p><code>Fy = clamp(coeff·Fz·α, ±μ·Fz)</code><br><code>coeff</code> = <code>TireParams::cornering_stiffness_coeff</code>, <code>μ</code> = <code>friction_coefficient</code>.</p>
+      </div>
+      <div class="box-card active">
+        <h4>ISuspensionModel <span class="badge active">RigidSuspensionModel</span></h4>
+        <p><code>Fz_front = m·g·b/L − m·ax·h/L</code><br><code>Fz_rear = m·g·a/L + m·ax·h/L</code><br><code>h</code> = <code>VehicleData::cog_height</code> (0 ⇒ static split only).</p>
+      </div>
+      <div class="box-card active">
+        <h4>IDrivetrainModel <span class="badge active">DirectAccelDrivetrainModel</span></h4>
+        <p><code>Fx = mass · u_a</code> — bit-for-bit regression anchor vs. the pre-refactor behavior.</p>
+      </div>
+      <div class="box-card active">
+        <h4>IAeroModel <span class="badge active">SimpleAeroModel</span></h4>
+        <p><code>Fx = −mass · CA · vx·|vx|</code> — bit-for-bit regression anchor vs. the pre-refactor behavior.</p>
+      </div>
+      <div class="box-card active">
+        <h4>ISteeringModel <span class="badge active">Instantaneous / RateLimited</span></h4>
+        <p><code>InstantaneousSteeringModel</code> (default) or <code>RateLimitedSteeringModel</code> when <code>steering.use_rate_limit</code> — the latter finally activates <code>max_steering_wheel_rate</code>, parsed since day one but unused by any model until this work.</p>
+      </div>
+    </div>
+
+    <h3 id="step-flow">Step() Sequence</h3>
+    <pre><code>VehicleState ComposedVehicleModel::Step(state, controls, dt) {
+    if (!actuator_seeded_) applied_steering_ = state.steering_angle;  // a rebuilt model keeps the wheel angle
+    n = ceil(dt / 2 ms);                                              // explicit Euler is stiff at low speed
+    for (i = 0; i &lt; n; ++i) state = SubStep(state, controls, dt / n);
+    return state;
+}
+
+VehicleState ComposedVehicleModel::SubStep(state, controls, h) {
+    delta = UpdateSteering(controls.steering_angle, h);              // ISteeringModel — always first
+    if (state.speed &lt; kMinVx /* 0.5 m/s */)
+        next = KinematicFallback(state, {delta, controls.acceleration}, h);
+    else {
+        loads = UpdateAxleLoads(last_ax_, state.speed);              // ISuspensionModel, uses PREVIOUS ax
+        ComputeTireForces(delta, state, loads);                      // ITireModel × 2
+        fx    = ComputeDrivetrainForce(...) + ComputeAeroForce(...); // IDrivetrainModel + IAeroModel
+        next  = IntegrateDynamics(state, fx, delta, h);              // front force projected with delta;
+    }                                                                // (x, y) = REAR AXLE: lateral vel. vy − b·r
+    last_ax_ = (next.speed - state.speed) / h;
+    next.steering_angle = delta;                                     // applied wheel angle, read by LQR/MPC/MPPI
+    return next;
+}</code></pre>
+    <p>Every private helper is 2–20 lines, one level of abstraction — <code>Step()</code> itself is pure delegation. <code>UpdateAxleLoads</code> deliberately uses the <em>previous</em> step's longitudinal acceleration rather than solving an <code>ax</code>/<code>Fz</code> algebraic loop within one step — a one-step lag that also loosely approximates a real suspension's physical lag behind commanded acceleration.</p>
+    <div class="callout done">
+      <strong class="tag">Yaw inertia</strong>
+      <code>Iz_ = (data.yaw_inertia &gt; 0) ? data.yaw_inertia : data.mass·a·b</code> — computed once in the constructor. Both vehicle JSON files now set an explicit, literature-grounded <code>yaw_inertia</code> (see <a href="#data-model">Data Model</a>) rather than relying on the coarse two-point-mass fallback.
+    </div>
+  </section>
+
+  <section id="data-model">
+    <h2>Data Model</h2>
+    <a class="diagram-link" href="vehicle_dynamics_architecture.drawio">→ See diagram page 4 — "Data Model — VehicleData and VehicleState"</a>
+
+    <div class="box-grid">
+      <div class="box-card">
+        <h4>VehicleData <span class="badge data">global-scope struct</span></h4>
+        <table>
+          <tr><th>Group</th><th>Fields</th></tr>
+          <tr><td>Dynamics</td><td><code>mass, a, b, CA, cog_height*, yaw_inertia*</code></td></tr>
+          <tr><td>Steering limits</td><td><code>minimum_turning_radius, max/min_steering_wheel_angle, max_steering_wheel_rate, steering_wheel_to_tire_angle_ratio</code></td></tr>
+          <tr><td>Geometry</td><td><code>wheelbase, wheel_radius/width/tread, overhangs, vehicle_height</code></td></tr>
+          <tr><td><code>TireParams tire</code></td><td><code>enabled, cornering_stiffness_coeff=6.0, friction_coefficient=1.0</code></td></tr>
+          <tr><td><code>SuspensionParams suspension</code></td><td><code>enabled</code> — gates <code>cog_height</code></td></tr>
+          <tr><td><code>SteeringParams steering</code></td><td><code>enabled, use_rate_limit</code></td></tr>
+        </table>
+        <p style="font-size:12.5px;color:var(--text-muted)">* <code>cog_height</code>/<code>yaw_inertia</code> are new this cycle.</p>
+      </div>
+      <div class="box-card">
+        <h4>VehicleState / VehicleControls</h4>
+        <p><code>VehicleState</code>: <code>x, y, heading, speed, lateral_speed, yaw_rate</code>.</p>
+        <p><code>VehicleControls</code>: <code>steering_angle, acceleration</code>.</p>
+      </div>
+    </div>
+
+    <h3 id="vehicle-values">Bus 01 vs. Car 01 — Current Values</h3>
+    <p>Both vehicle JSON files now actually populate the new fields (previously they were wired end-to-end but silently defaulted, so both vehicles behaved identically):</p>
+    <table>
+      <tr><th>Field</th><th>Bus 01</th><th>Car 01</th><th>Reasoning</th></tr>
+      <tr><td><code>cog_height</code></td><td>1.20 m</td><td>0.65 m</td><td><code>k_h × vehicle_height</code>; buses run lower (heavy chassis-mounted mass, more "dead" height above it)</td></tr>
+      <tr><td><code>yaw_inertia</code></td><td>47000 kg·m²</td><td>1960 kg·m²</td><td><code>mass·k²</code>, <code>k≈</code>fraction of wheelbase; buses run relatively higher (elongated chassis, mass toward the ends)</td></tr>
+      <tr><td><code>tire.cornering_stiffness_coeff</code></td><td>6.0</td><td>9.0</td><td>bus value matches the pre-existing "truck/bus tire" heuristic; passenger radials run stiffer per unit load</td></tr>
+      <tr><td><code>tire.friction_coefficient</code></td><td>0.80</td><td>0.95</td><td>commercial tread (wear/load optimized) vs. ordinary dry-pavement passenger tire</td></tr>
+      <tr><td><code>suspension.enabled</code></td><td>true</td><td>true</td><td>required for <code>cog_height</code> to take effect</td></tr>
+      <tr><td><code>steering.use_rate_limit</code></td><td>true</td><td>true</td><td>activates the already-correct <code>max_steering_wheel_rate</code> (250/200 deg/s)</td></tr>
+    </table>
+    <p style="font-size:13px;color:var(--text-muted)">All values are documented engineering estimates, not measured OEM data — full formulas in <code>README.md</code>'s "Adding a New Vehicle" section.</p>
+  </section>
+
+  <section id="ui">
+    <h2>UI Integration &amp; Live Tuning</h2>
+    <a class="diagram-link" href="vehicle_dynamics_architecture.drawio">→ See diagram page 5 — "UI Integration, Live Tuning and Tests"</a>
+    <p>A "Vehicle Model" picker lives on the <strong>simulation screen</strong>, not the main screen — deliberate: main-screen selections (vehicle/algorithm/map) are hard prerequisites that reset the whole scenario on change; model fidelity has a safe default and the actual use case is comparing fidelity <strong>mid-run</strong>, which requires <em>not</em> resetting.</p>
+    <pre><code>selectedVehicleModelKind_, kAvailableVehicleModels = {"Kinematic", "Dynamic (Linear Tire)"}
+modelDirty_  →  consumed lazily in TickSimulation(), exactly like paramsDirty_/RebuildAlgorithm()
+
+RebuildVehicleModel():
+    VehicleData vd = vehicle_loader_.GetVehicle();      // copy — never mutate canonical data
+    if (tuneTire_.enabled)       { vd.tire.enabled = true; vd.tire.cornering_stiffness_coeff = ...; }
+    if (tuneSuspension_.enabled) { vd.suspension.enabled = true; vd.cog_height = ...; }
+    if (tuneSteering_.enabled)   { vd.steering.enabled = true; vd.steering.use_rate_limit = ...; ... }
+    simModel_ = MakeVehicleModel(fidelity, vd);
+    // simVehicleState_ deliberately left untouched — see below</code></pre>
+    <p><strong>Fidelity swap never resets <code>simVehicleState_</code></strong> — safe in both directions: Kinematic always writes <code>lateral_speed=0</code> and a kinematic <code>yaw_rate</code> estimate every step, so handing those to a freshly-swapped dynamic model is the physically correct initial condition, not a hack. Going the other way, <code>KinematicBicycleModel::Step</code> never reads <code>lateral_speed</code> and only overwrites <code>yaw_rate</code>, so stale dynamic-model state is simply inert on the next step.</p>
+
+    <div class="callout warn">
+      <strong class="tag">Bugs found &amp; fixed during manual testing</strong>
+      <strong>Panel collision:</strong> the new tuning panel's height budget was smaller than its actual content, visually overlapping the algorithm-tuning panel below it. Fixed by wrapping both panels' slider lists in their own bounded/scrollable <code>ImGui::BeginChild</code> regions.<br>
+      <strong>Popup off-screen:</strong> the "Select Vehicle Model" popup opened anchored near its button (bottom-right of the panel), clipping off the window edge. Fixed by explicitly centering it via <code>SetNextWindowPos(GetMainViewport()-&gt;GetCenter(), ...)</code>.
+    </div>
+  </section>
+
+  <section id="tests">
+    <h2>Test Suite</h2>
+    <p><code>tests/vehicle_model_tests.cpp</code> — plain <code>int main()</code>, no framework, matching the project's zero-dependency style. Builds independently of the GUI (no ImGui/ImPlot/GLFW/OpenGL), safe for headless CI.</p>
+    <table>
+      <tr><th>Group</th><th>Checks</th><th>What it proves</th></tr>
+      <tr><td>Kinematic regression</td><td>4</td><td>Adding <code>IVehicleModel</code> changed zero arithmetic in <code>KinematicBicycleModel</code></td></tr>
+      <tr><td>Factory equivalence</td><td>1</td><td><code>MakeVehicleModel(Kinematic)</code> matches direct construction bit-for-bit over 50 steps</td></tr>
+      <tr><td>LinearTireModel</td><td>2</td><td>Unsaturated <code>Fy=C·α</code>; friction-circle clamp engages past the limit</td></tr>
+      <tr><td>SimpleAeroModel</td><td>2</td><td>Forward drag magnitude; reverse-motion sign flip</td></tr>
+      <tr><td>DirectAccelDrivetrainModel</td><td>2</td><td>Bus 01 / Car 01 mass cases</td></tr>
+      <tr><td>RateLimitedSteeringModel</td><td>1</td><td>Ramp-up, settle, and reversal all clamp correctly</td></tr>
+      <tr><td>YawInertiaOverride</td><td>2</td><td>Explicit override matching the fallback reproduces it exactly; a different value measurably changes yaw-rate response</td></tr>
+    </table>
+    <p><strong>14 / 14 pass.</strong> Run via <code>./vehicle_model_tests</code> (exit 0/1) or <code>ctest -R vehicle_model_tests --output-on-failure</code>. Since the 2026-11 audit, <code>ctest</code> also runs <code>edge_tests</code> (regression checks for every audit fix, including the rear-axle reference, the low-speed rate limit and sub-stepping accuracy) and six closed-loop scenarios.</p>
+  </section>
+
+  <section id="file-map">
+    <h2>File Map</h2>
+    <pre><code>include/vehicle/
+  i_vehicle_model.hpp          vehicle_model_factory.hpp     composed_vehicle_model.hpp
+  math_utils.hpp               vehicle_data.hpp (ext.)       vehicle_state.hpp (ext.)
+  vehicle_bicycle_model.hpp (ext.)
+  tire/       i_tire_model.hpp, linear_tire_model.hpp
+  suspension/ i_suspension_model.hpp, rigid_suspension_model.hpp
+  drivetrain/ i_drivetrain_model.hpp, direct_accel_drivetrain_model.hpp
+  aero/       i_aero_model.hpp, simple_aero_model.hpp
+  steering/   i_steering_model.hpp, instantaneous_steering_model.hpp, rate_limited_steering_model.hpp
+
+src/vehicle/  — mirrors include/vehicle/ 1:1
+  vehicle_loader.cpp (ext.), vehicle_bicycle_model.cpp (ext.), composed_vehicle_model.cpp,
+  vehicle_model_factory.cpp, tire/, suspension/, drivetrain/, aero/, steering/
+
+tests/vehicle_model_tests.cpp     — 14-check smoke-test executable
+data/vehicle/vehicle0{1,2}.json   — Bus 01 / Car 01, fully populated (see Data Model above)</code></pre>
+  </section>
+
+  <section id="not-done">
+    <h2>What's Not Implemented Yet</h2>
+    <ul>
+      <li><strong>Level 3</strong>: quarter-car suspension (spring/damper states), torque-based drivetrain, per-corner (4-wheel) state, and the fixed-timestep-accumulator integration fix (explicit Euler becomes unconditionally unstable once a real suspension is added — not an issue yet since <code>RigidSuspensionModel</code> has no spring/damper states). No scaffolding for this exists in the codebase yet — it was removed as unused during a cleanup pass (see the note at the top of this document) and will be reintroduced when this work actually starts.</li>
+      <li><strong>Level 4</strong>: no ABS/ESP overlay interface exists yet — none did before either implementation was needed, so none was added speculatively.</li>
+      <li><strong>Nonlinear tire model</strong>: only <code>LinearTireModel</code> exists; <code>ModelFidelity::DynamicPacejkaTire</code> deliberately not added as an enum value yet.</li>
+      <li><code>tire.friction_coefficient</code> is JSON-configurable but not exposed as a live UI slider.</li>
+    </ul>
+  </section>
+
+  <section id="references">
+    <h2>References</h2>
+    <ol class="ref-list">
+      <li><strong>Gillespie, T.</strong> <em>Fundamentals of Vehicle Dynamics</em>, SAE, 1992. Axle load transfer, coordinate frames — underlies <code>RigidSuspensionModel</code>.</li>
+      <li><strong>Wong, J.Y.</strong> <em>Theory of Ground Vehicles</em>, Wiley, 2001. Dynamic axle loads, braking-force distribution, aero resistance.</li>
+      <li><strong>Pacejka, H. / Rotenberg, S. (UCSD CSE291)</strong> <em>Tire and Vehicle Dynamics</em>. Component breakdown (tire/suspension/drivetrain/aero/sensors) — the direct inspiration for the subsystem interfaces.</li>
+      <li><strong>Thesis chapter</strong> — nonlinear 3-DOF bicycle model derivation, Segel tire model, SAE J670e convention — underlies <code>ComposedVehicleModel</code>'s vehicle-frame equations.</li>
+      <li><strong>Popp, K. &amp; Schiehlen, W.</strong> <em>Ground Vehicle Dynamics</em>, Springer, 2010. Modular subsystem architecture with standardized interfaces — the direct inspiration for <code>IVehicleModel</code>/<code>Ixxx</code> subsystem design.</li>
+    </ol>
+    <p style="font-size:12.5px;color:var(--text-muted)">Full PDFs in <code>docs/vehicle_dynamics_doc/</code>.</p>
+  </section>
+
+  <footer>
+    Describes the state of the vehicle model architecture as actually implemented in this repo. Companion diagram: <code>vehicle_dynamics_architecture.drawio</code> (same folder). See <code>IMPLEMENTATION_STATUS.md</code> for the full session-by-session build log.
+  </footer>
+</main>
+</div>
+</body>
+</html>
